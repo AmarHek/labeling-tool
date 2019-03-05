@@ -6,6 +6,7 @@ import java.awt.EventQueue;
 public class Interface extends JFrame{
     private JPanel panel1;
     private JTextField previous;
+    private Database data;
 
     public Interface() {
         initUI();
@@ -16,7 +17,7 @@ public class Interface extends JFrame{
         var openButton = new JButton("Open");
         var testButton = new JButton("Test");
 
-        openButton.addActionListener((event) -> String image_path = choose_directory());
+        openButton.addActionListener((event) -> make_database());
         testButton.addActionListener((event) -> JOptionPane.showMessageDialog(null, image_path));
 
         createLayout(openButton);

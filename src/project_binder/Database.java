@@ -10,7 +10,7 @@ import java.util.Random;
 public class Database {
     private File img_dir;
     private File[] image_files;
-    private Map<String, Integer> labels = new HashMap();
+    private Map<String, Integer> labels = new HashMap<>();
     private ArrayList<File> previous;
 
     static Scanner scanner = new Scanner(System.in);
@@ -44,6 +44,7 @@ public class Database {
     }
 
     private void save_labels(){
+        
 
     }
 
