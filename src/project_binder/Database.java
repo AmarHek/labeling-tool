@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Database {
-    private File img_dir;
-    private File[] image_files;
-    private Map<String, Integer> labels = new HashMap<>();
-    private ArrayList<File> previous;
+    protected File img_dir;
+    protected File[] image_files;
+    protected Map<String, Integer> labels = new HashMap<>();
+    protected ArrayList<File> previous;
 
     static Scanner scanner = new Scanner(System.in);
 
@@ -48,22 +48,15 @@ public class Database {
 
     }
 
-    protected Database(){
-        previous = new ArrayList<>();
-        String img_dir_name = "C:/Users/Amar/Datasets/ChestXRay/images_labeled/";
-        System.out.println("Directory is set to" + img_dir_name + ", change it? [y/n]");
-        if (scanner.nextLine().equals("y")){
-            System.out.println("Enter new directory");
-            img_dir_name = scanner.nextLine();
-            System.out.println("New directory is " + img_dir_name);
-        }
-        img_dir = new File(img_dir_name);
+    public Database(File img_dir){
+        this.img_dir = img_dir;
         image_files = img_dir.listFiles();
+        previous = new ArrayList<>();
     }
 
     public static void main(String[] args){
 
-        Database data = new Database();
+        Database data = new Database(new File("C:/Users/maste/Datasets/ChestXRay/images/Test/"));
         data.add_label_entry(data.image_files[1], 0);
         data.add_label_entry(data.image_files[0], 1);
         for (int i=0; i!=10; i++){

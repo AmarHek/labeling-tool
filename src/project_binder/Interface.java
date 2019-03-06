@@ -2,11 +2,12 @@ package project_binder;
 
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.io.File;
 
 public class Interface extends JFrame{
+    private Database data;
     private JPanel panel1;
     private JTextField previous;
-    private Database data;
 
     public Interface() {
         initUI();
@@ -17,22 +18,23 @@ public class Interface extends JFrame{
         var openButton = new JButton("Open");
         var testButton = new JButton("Test");
 
-        openButton.addActionListener((event) -> make_database());
-        testButton.addActionListener((event) -> JOptionPane.showMessageDialog(null, image_path));
+        openButton.addActionListener((event) -> set_database());
+        testButton.addActionListener((event) -> JOptionPane.showMessageDialog(null, data.img_dir));
 
-        createLayout(openButton);
+        createLayout(openButton, testButton);
 
         setTitle("XRay-Tinder");
-        setSize(1600, 800);
+        setSize(1000, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
-    private String make_database(){
+    private void set_database(){
         JFileChooser chooser = new JFileChooser("./");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.showOpenDialog(null);
-        return chooser.getSelectedFile().getAbsolutePath();
+        File img_dir = new File(chooser.getSelectedFile().getAbsolutePath());
+        data = new Database(img_dir);
     }
 
     private void createLayout(JComponent... arg){
