@@ -2,6 +2,7 @@ package project_binder;
 
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 public class Interface extends JFrame{
@@ -15,18 +16,35 @@ public class Interface extends JFrame{
 
     private void initUI() {
 
+        createMenuBar();
         var openButton = new JButton("Open");
         var testButton = new JButton("Test");
 
         openButton.addActionListener((event) -> set_database());
         testButton.addActionListener((event) -> JOptionPane.showMessageDialog(null, data.img_dir));
 
-        createLayout(openButton, testButton);
+        createLayout(testButton);
 
         setTitle("XRay-Tinder");
         setSize(1000, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+    }
+
+    private void createMenuBar(){
+        var menubar = new JMenuBar();
+        var fileMenu = new JMenu("File");
+        fileMenu.setMnemonic(KeyEvent.VK_F);
+
+        var eMenuItem = new JMenuItem("Select");
+        eMenuItem.setMnemonic(KeyEvent.VK_E);
+        eMenuItem.setToolTipText("Choose File Directory");
+        eMenuItem.addActionListener((event) -> set_database());
+
+        fileMenu.add(eMenuItem);
+        menubar.add(fileMenu);
+
+        setJMenuBar(menubar);
     }
 
     private void set_database(){
