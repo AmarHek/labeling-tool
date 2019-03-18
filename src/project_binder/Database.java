@@ -32,7 +32,7 @@ public class Database {
         this.previous.clear();
     }
 
-    private File get_random_file(){
+    protected File get_random_file(){
         Random generator = new Random();
         int randomIndex = generator.nextInt(this.image_files.length);
         File next_image = this.image_files[randomIndex];
