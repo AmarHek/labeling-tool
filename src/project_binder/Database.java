@@ -6,21 +6,40 @@ import java.io.File;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Random;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 public class Database {
     protected File img_dir;
     protected File[] image_files;
     protected Map<String, Integer> labels = new HashMap<>();
     protected ArrayList<File> previous;
+    protected int previous_counter;
 
-    static Scanner scanner = new Scanner(System.in);
+    // static Scanner scanner = new Scanner(System.in);
 
-    private void add_label_entry(File file, int label){
-        String file_name = file.getName();
-        this.labels.put(file_name, label);
+    public Database(File img_dir){
+        this.img_dir = img_dir;
+        image_files = img_dir.listFiles();
+        previous = new ArrayList<>();
+        previous_counter = 0;
     }
 
-    private void clear_labels(){
+    protected void add_label_entry(File file, int label){
+        String file_name = file.getName();
+        this.labels.put(file_name, label);
+        if(!this.previous.contains(file)){
+            add_previous_file(file);
+        }
+    }
+
+    protected void resetCounter(){ previous_counter = 0; }
+
+    protected void incrementCounter(){ previous_counter++; }
+
+    protected void decrementCounter(){ previous_counter--; }
+
+    protected void clear_labels(){
         labels.clear();
     }
 
@@ -48,11 +67,6 @@ public class Database {
 
     }
 
-    public Database(File img_dir){
-        this.img_dir = img_dir;
-        image_files = img_dir.listFiles();
-        previous = new ArrayList<>();
-    }
 
     public static void main(String[] args){
 
