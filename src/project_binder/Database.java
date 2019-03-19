@@ -1,11 +1,18 @@
 package project_binder;
 
-import java.util.HashMap;
-import java.util.Scanner;
+
 import java.io.File;
+import java.io.PrintWriter;
+
+import java.io.IOException;
+
+import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.ArrayList;
+
 import java.util.Random;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
@@ -43,11 +50,11 @@ public class Database {
         labels.clear();
     }
 
-    private void add_previous_file(File file_name){
+    protected void add_previous_file(File file_name){
         this.previous.add(file_name);
     }
 
-    private void clear_previous_files(){
+    protected void clear_previous_files(){
         this.previous.clear();
     }
 
@@ -62,17 +69,56 @@ public class Database {
         return next_image;
     }
 
-    private void save_labels(){
-        
+    protected void save_labels_to_json(File save_file){
+        JSONObject savefile = new JSONObject();
 
+        savefile.put("image directory", this.img_dir);
+        savefile.put("number of checked files", previous.size());
+
+        int num_findings = 0;
+        for(int i=0; i<previous.size(); i++){
+            num_findings += labels.get(previous.get(i));
+        }
+
+        savefile.put("number of label = finding", num_findings);
+        savefile.put("number of label = no finding", previous.size() - num_findings);
+
+        JSONArray file_entries = new JSONArray();
+
+        for(int i=0; i<previous.size(); i++){
+            Map m = new LinkedHashMap(2);
+            String filename = previous.get(i).getName();
+            int label = labels.get(filename);
+            m.put("file name", filename);
+            m.put("label", label);
+            file_entries.add(m);
+        }
+
+        savefile.put("Labeled Files", file_entries);
+
+        String path = save_file.getAbsolutePath();
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(path);
+            pw.write(savefile.toJSONString());
+        }
+        catch (IOException e){
+            System.err.println("Caught IOException" + e.getMessage());
+        }
+        finally {
+            if(pw != null){
+                pw.flush();
+                pw.close();
+            }
+        }
     }
-
 
     public static void main(String[] args){
 
         Database data = new Database(new File("C:/Users/maste/Datasets/ChestXRay/images/Test/"));
         data.add_label_entry(data.image_files[1], 0);
         data.add_label_entry(data.image_files[0], 1);
+
         for (int i=0; i!=10; i++){
             System.out.println(data.get_random_file());
         }

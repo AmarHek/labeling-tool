@@ -13,8 +13,7 @@ import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 public class Interface extends JFrame{
 
     private Database data;
-    private JPanel panel1;
-    private JTextField previous;
+    private JPanel panel;
 
     private JLabel image_label;
     private File image_buffer;
@@ -32,6 +31,7 @@ public class Interface extends JFrame{
         createLayout();
 
         setTitle("XRay-Tinder");
+        //TODO: Variable size
         //setSize(1000, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -92,6 +92,9 @@ public class Interface extends JFrame{
         gl.setAutoCreateContainerGaps(true);
         gl.setAutoCreateGaps(true);
 
+        //TODO: Improve Layout -> Dynamic
+        //TODO: Add Skip button? Add button(s) to scroll through previous images
+        //TODO: Add Reset button (or menu)
         gl.setHorizontalGroup(
                 gl.createParallelGroup()
                         .addGroup(gl.createSequentialGroup()
@@ -136,11 +139,14 @@ public class Interface extends JFrame{
         }
     }
 
+
+    // Methods for handling Database: creating it, setting labels, saving and loading files
+
     private void set_database(){
         JFileChooser chooser = new JFileChooser("./");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.showOpenDialog(null);
-        File img_dir = new File(chooser.getSelectedFile().getAbsolutePath());
+        chooser.showOpenDialog(panel);
+        File img_dir = chooser.getSelectedFile();
         data = new Database(img_dir);
         display_random_image();
     }
@@ -156,6 +162,21 @@ public class Interface extends JFrame{
         }
     }
 
+    private void save_progress(){
+        JFileChooser chooser = new JFileChooser("./");
+        chooser.showOpenDialog(panel);
+        File save_dir = chooser.getSelectedFile();
+        this.data.save_labels_to_json(save_dir);
+    }
+
+    //TODO: load progress
+    private void load_progress(){
+        ;
+    }
+
+
+
+
     private void showPrevious(){
         if (data.previous.isEmpty()) {
             JOptionPane.showMessageDialog(null, "No Previous images yet.",
@@ -169,6 +190,8 @@ public class Interface extends JFrame{
         }
     }
 
+
+    //Main method
 
     public static void main(String[] args){
          EventQueue.invokeLater(() -> {
