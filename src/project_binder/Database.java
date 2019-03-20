@@ -2,34 +2,44 @@ package project_binder;
 
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.PrintWriter;
 
 import java.io.IOException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-
-import java.util.Random;
+import java.util.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Database {
     protected File img_dir;
     protected File[] image_files;
-    protected Map<String, Integer> labels = new HashMap<>();
+    protected Map<String, Integer> labels;
     protected ArrayList<File> previous;
-    protected int previous_counter;
+    private int previous_counter;
 
     // static Scanner scanner = new Scanner(System.in);
 
     public Database(File img_dir){
         this.img_dir = img_dir;
-        image_files = img_dir.listFiles();
-        previous = new ArrayList<>();
-        previous_counter = 0;
+        this.image_files = img_dir.listFiles();
+        this.labels = new HashMap<>();
+        this.previous = new ArrayList<>();
+        this.previous_counter = 0;
+    }
+
+    public Database(){
+        this.labels = new HashMap<>();
+        this.previous = new ArrayList<>();
+        this.previous_counter = 0;
+    }
+
+    protected void set_images(File img_dir){
+        this.img_dir = img_dir;
+        this.image_files = img_dir.listFiles();
     }
 
     protected void add_label_entry(File file, int label){
@@ -40,11 +50,24 @@ public class Database {
         }
     }
 
-    protected void resetCounter(){ previous_counter = 0; }
+    protected int get_previous_counter(){
+        return previous_counter;
+    }
 
-    protected void incrementCounter(){ previous_counter++; }
+    protected void resetCounter(){
+        previous_counter = 0;
+    }
 
-    protected void decrementCounter(){ previous_counter--; }
+    protected void incrementCounter(){
+        if(previous_counter < previous.size())
+        previous_counter++;
+    }
+
+    protected void decrementCounter(){
+        if(previous_counter > 0) {
+            previous_counter--;
+        }
+    }
 
     protected void clear_labels(){
         labels.clear();
@@ -70,31 +93,36 @@ public class Database {
     }
 
     protected void save_labels_to_json(File save_file){
+
         JSONObject savefile = new JSONObject();
 
-        savefile.put("image directory", this.img_dir);
-        savefile.put("number of checked files", previous.size());
+        Map meta = new LinkedHashMap(4);
+
+        meta.put("image directory", this.img_dir.getAbsolutePath());
+        meta.put("number of checked files", previous.size());
 
         int num_findings = 0;
-        for(int i=0; i<previous.size(); i++){
-            num_findings += labels.get(previous.get(i));
+        for(File file: previous){
+            num_findings += labels.get(file.getName());
         }
 
-        savefile.put("number of label = finding", num_findings);
-        savefile.put("number of label = no finding", previous.size() - num_findings);
+        meta.put("number of 'finding'", num_findings);
+        meta.put("number of 'no finding'", previous.size() - num_findings);
+
+        savefile.put("Metadata", meta);
 
         JSONArray file_entries = new JSONArray();
 
-        for(int i=0; i<previous.size(); i++){
+        for(File file: previous){
             Map m = new LinkedHashMap(2);
-            String filename = previous.get(i).getName();
+            String filename = file.getName();
             int label = labels.get(filename);
             m.put("file name", filename);
             m.put("label", label);
             file_entries.add(m);
         }
 
-        savefile.put("Labeled Files", file_entries);
+        savefile.put("Files", file_entries);
 
         String path = save_file.getAbsolutePath();
         PrintWriter pw = null;
@@ -113,15 +141,57 @@ public class Database {
         }
     }
 
+    protected void load_from_json(File savefile){
+        // preliminary: clear previous and labels
+        this.clear_labels();
+        this.clear_previous_files();
+
+        try {
+            // load the file
+            Object obj = new JSONParser().parse(new FileReader(savefile.getAbsolutePath()));
+
+            // typecast obj to JSONObject
+            JSONObject loaded = (JSONObject) obj;
+
+            // extract image directory
+            Map meta = ((Map) loaded.get("Metadata"));
+            String img_dir = (String) meta.get("image directory");
+
+            // Set image directory and load file(name)s
+            this.set_images(new File(img_dir));
+
+            // getting the file arrays
+            JSONArray file_entries = (JSONArray) loaded.get("Files");
+
+            // iterating the files
+            Iterator iter = file_entries.iterator();
+            while (iter.hasNext()) {
+                // extract the map from each entry and iterate
+                Map m = (Map) iter.next();
+                String filename = (String) m.get("file name");
+                int label = (int) (long) m.get("label");
+                File file = new File(img_dir + '/' + filename);
+                this.add_label_entry(file, (int)label);
+                this.add_previous_file(file);
+            }
+        }
+        catch (IOException ioe){
+            System.err.println("Caught IOException" + ioe.getMessage());
+        }
+        catch (ParseException pe){
+            System.err.println("Caught ParseException" + pe.getMessage());
+        }
+    }
+
     public static void main(String[] args){
 
-        Database data = new Database(new File("C:/Users/maste/Datasets/ChestXRay/images/Test/"));
-        data.add_label_entry(data.image_files[1], 0);
+        File test = new File("C:/Users/Amar/Git/xray-tinder/test.json");
+        Database data = new Database(new File("C:/Users/Amar/Datasets/ChestXRay/images_labeled"));
         data.add_label_entry(data.image_files[0], 1);
+        data.add_label_entry(data.image_files[1], 0);
+        data.add_label_entry(data.image_files[2], 1);
+        System.out.println(data.previous);
 
-        for (int i=0; i!=10; i++){
-            System.out.println(data.get_random_file());
-        }
     }
 
 }
