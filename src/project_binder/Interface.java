@@ -1,11 +1,10 @@
 package project_binder;
 
 import javax.swing.*;
-import java.awt.EventQueue;
+import java.awt.*;
+import java.awt.event.*;
+
 import java.io.File;
-//import javax.imageio.ImageIO;
-//import java.awt.image.BufferedImage;
-//import java.io.IOException;
 
 import static javax.swing.LayoutStyle.ComponentPlacement.*;
 
@@ -14,11 +13,12 @@ public class Interface extends JFrame{
     private Database data;
     private JPanel panel;
 
+    // image variables
     private JLabel image_label;
     private File image_buffer;
 
-    private String cur_img;
-    private String cur_label;
+    private JLabel current_file;
+    private JLabel current_label;
 
     private String placeholder;
 
@@ -32,11 +32,14 @@ public class Interface extends JFrame{
 
         createLayout();
 
-        setTitle("XRay-Tinder");
+        this.setTitle("XRay-Tinder");
         //TODO: Variable size
         //setSize(1000, 800);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        WindowListener exitListener = exit();
+        this.addWindowListener(exitListener);
     }
 
     private void createMenuBar(){
@@ -50,20 +53,20 @@ public class Interface extends JFrame{
         var saveMenuItem = new JMenuItem("Save");
         var loadMenuItem = new JMenuItem("Load");
 
-        var exitMenuItem = new JMenuItem("Exit");
+        var clearMenuItem = new JMenuItem("Clear");
 
         selectMenuItem.addActionListener((event) -> set_database());
         saveMenuItem.addActionListener((event) -> save_progress());
         loadMenuItem.addActionListener((event) -> load_progress());
 
-        exitMenuItem.addActionListener((event) -> System.exit(0));
+        clearMenuItem.addActionListener((event) -> clear_progress());
 
         fileMenu.add(selectMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(saveMenuItem);
         fileMenu.add(loadMenuItem);
         fileMenu.addSeparator();
-        fileMenu.add(exitMenuItem);
+        fileMenu.add(clearMenuItem);
 
         menubar.add(fileMenu);
 
@@ -75,27 +78,24 @@ public class Interface extends JFrame{
         // defining all Layout items
         JButton randomBtn = new JButton("Random");
         JButton nextBtn = new JButton("Next");
+        JButton previousBtn = new JButton("Previous");
         JButton findingBtn = new JButton("Finding");
         JButton nofindingBtn = new JButton("No Finding");
-
-        JButton previousBtn = new JButton("Previous");
 
         placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
-        cur_img = " ";
-        cur_label = " ";
+        current_file = new JLabel("Current Image:  ");
+        current_label = new JLabel("Finding:  ");
 
-        JLabel current_file = new JLabel("Current Image: " + cur_img);
-        JLabel current_label = new JLabel("Finding: " + cur_label);
-
-        // adding actions to buttons
-        randomBtn.addActionListener((event) -> display_random());
-        nextBtn.addActionListener((event) -> display_next());
-        findingBtn.addActionListener((event) -> addLabel(1));
-        nofindingBtn.addActionListener((event) -> addLabel(0));
-        previousBtn.addActionListener((event) -> display_previous());
+        Action next = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(e)
+                display_next();
+            }
+        };
 
         // adding values to status labels
 
@@ -107,26 +107,22 @@ public class Interface extends JFrame{
         gl.setAutoCreateGaps(true);
 
         //TODO: Improve Layout -> Dynamic
-        //TODO: Add Skip button? Add button(s) to scroll through previous images
-        //TODO: Add Reset button (or menu)
+
+        // Creating the Layout
         gl.setHorizontalGroup(
                 gl.createParallelGroup()
                         .addGroup(gl.createSequentialGroup()
-                                .addGroup(gl.createParallelGroup()
                                     .addComponent(randomBtn)
-                                    .addComponent(current_file))
-                                .addComponent(nextBtn)
-                                .addComponent(previousBtn)
-                                .addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(gl.createParallelGroup()
+                                    .addComponent(previousBtn)
+                                    .addComponent(nextBtn)
+                                    .addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(findingBtn)
-                                    .addComponent(current_label))
-                                .addComponent(nofindingBtn))
+                                    .addComponent(nofindingBtn))
                         .addComponent(image_label)
                         .addGroup(gl.createSequentialGroup()
-                                .addComponent(current_file)
-                                .addPreferredGap(UNRELATED, 50, 300)
-                                .addComponent(current_label))
+                                    .addComponent(current_file)
+                                    .addPreferredGap(RELATED, 20, 50)
+                                    .addComponent(current_label))
         );
 
         gl.setVerticalGroup(
@@ -147,19 +143,32 @@ public class Interface extends JFrame{
         gl.linkSize(current_file, current_label);
 
         pack();
+
+        // adding actions to buttons
+        randomBtn.addActionListener((event) -> display_random());
+        randomBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "pressed");
+        nextBtn.addActionListener((event) -> display_next());
+        nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "pressed");
+        previousBtn.addActionListener((event) -> display_previous());
+        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "released");
+        findingBtn.addActionListener((event) -> addLabel(1));
+        findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "released");
+        nofindingBtn.addActionListener((event) -> addLabel(0));
+        nofindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "released");
+
     }
 
     private void display_random(){
         if(this.data==null){
-            var pnl = (JPanel) getContentPane();
-            JOptionPane.showMessageDialog(pnl, "Please first choose a directory from File and then Select",
-                    "No Directory", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(panel, "Please first create a database from File: New.",
+                    "Missing Database", JOptionPane.WARNING_MESSAGE);
         }
         else{
             this.data.resetCounter();
             image_buffer = this.data.get_random_file();
             try {
             this.image_label.setIcon(new ImageIcon(image_buffer.getPath()));
+            this.setStatus();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "File not found");
                 System.out.println(e);
@@ -176,6 +185,7 @@ public class Interface extends JFrame{
         else{
             image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
             this.image_label.setIcon(new ImageIcon(image_buffer.getPath()));
+            this.setStatus();
         }
     }
 
@@ -188,6 +198,7 @@ public class Interface extends JFrame{
         else{
             image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
             this.image_label.setIcon(new ImageIcon(image_buffer.getPath()));
+            this.setStatus();
         }
     }
 
@@ -214,6 +225,19 @@ public class Interface extends JFrame{
         display_random();
     }
 
+    private void clear_progress(){
+        if(this.data == null){
+            JOptionPane.showMessageDialog(panel, "Please first create a database from File: New.",
+                    "Missing Database", JOptionPane.WARNING_MESSAGE);
+        }
+        int dialogResult = JOptionPane.showConfirmDialog(panel, "Clear all progress?",
+                null, JOptionPane.YES_NO_OPTION);
+        if (dialogResult == JOptionPane.YES_OPTION) {
+            this.data.clear_previous_files();
+            this.data.clear_labels();
+        }
+    }
+
     private void save_progress(){
         JFileChooser chooser = new JFileChooser("./");
         chooser.showOpenDialog(panel);
@@ -228,6 +252,40 @@ public class Interface extends JFrame{
         this.data = new Database();
         this.data.load_from_json(savefile);
         display_random();
+    }
+
+    // change status bar
+    private void setStatus(){
+        String filename = image_buffer.getName();
+        String label;
+        if(!data.previous.contains(image_buffer)){
+            label = " ";
+        }
+        else if(data.labels.get(image_buffer.getName()) == 0){
+            label = "No";
+        }
+        else{
+            label = "Yes";
+        }
+        this.current_file.setText("Current File: " + filename);
+        this.current_label.setText("Finding: " + label);
+    }
+
+    private WindowListener exit(){
+        return new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                int result = JOptionPane.showConfirmDialog(panel,
+                        "Do you want to save your progress before exiting?");
+                if(result == JOptionPane.YES_OPTION){
+                    save_progress();
+                    System.exit(0);
+                }
+                else if(result == JOptionPane.NO_OPTION){
+                    System.exit(0);
+                }
+            }
+        };
     }
 
     //Main method

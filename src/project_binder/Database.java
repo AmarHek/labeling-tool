@@ -142,7 +142,7 @@ public class Database {
     }
 
     protected void load_from_json(File savefile){
-        // preliminary: clear previous and labels
+        // preliminary: clear previous files and labels
         this.clear_labels();
         this.clear_previous_files();
 
@@ -163,16 +163,14 @@ public class Database {
             // getting the file arrays
             JSONArray file_entries = (JSONArray) loaded.get("Files");
 
-            // iterating the files
-            Iterator iter = file_entries.iterator();
-            while (iter.hasNext()) {
+            // looping over all file entries
+            for(int i=0; i < file_entries.size(); i++){
                 // extract the map from each entry and iterate
-                Map m = (Map) iter.next();
+                Map m = (Map) file_entries.get(i);
                 String filename = (String) m.get("file name");
                 int label = (int) (long) m.get("label");
                 File file = new File(img_dir + '/' + filename);
                 this.add_label_entry(file, (int)label);
-                this.add_previous_file(file);
             }
         }
         catch (IOException ioe){
@@ -186,12 +184,11 @@ public class Database {
     public static void main(String[] args){
 
         File test = new File("C:/Users/Amar/Git/xray-tinder/test.json");
-        Database data = new Database(new File("C:/Users/Amar/Datasets/ChestXRay/images_labeled"));
-        data.add_label_entry(data.image_files[0], 1);
-        data.add_label_entry(data.image_files[1], 0);
-        data.add_label_entry(data.image_files[2], 1);
-        System.out.println(data.previous);
-
+        Database data = new Database();
+        data.load_from_json(test);
+        for (File file: data.previous){
+            System.out.println(file.getPath());
+        }
     }
 
 }
