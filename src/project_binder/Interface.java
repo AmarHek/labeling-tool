@@ -17,6 +17,13 @@ public class Interface extends JFrame{
     private JLabel image_label;
     private File image_buffer;
 
+    // actions
+    private Action random;
+    private Action next;
+    private Action previous;
+    private Action finding;
+    private Action nofinding;
+
     private JLabel current_file;
     private JLabel current_label;
 
@@ -29,7 +36,7 @@ public class Interface extends JFrame{
     private void initUI() {
 
         createMenuBar();
-
+        setActions();
         createLayout();
 
         this.setTitle("XRay-Tinder");
@@ -42,23 +49,21 @@ public class Interface extends JFrame{
         this.addWindowListener(exitListener);
     }
 
+
+    // sets the menu bar and respective actions
     private void createMenuBar(){
-
         var menubar = new JMenuBar();
-
         var fileMenu = new JMenu("File");
 
         //TODO Have "New" create a new file after choosing image directory
         var selectMenuItem = new JMenuItem("New");
         var saveMenuItem = new JMenuItem("Save");
         var loadMenuItem = new JMenuItem("Load");
-
         var clearMenuItem = new JMenuItem("Clear");
 
         selectMenuItem.addActionListener((event) -> set_database());
         saveMenuItem.addActionListener((event) -> save_progress());
         loadMenuItem.addActionListener((event) -> load_progress());
-
         clearMenuItem.addActionListener((event) -> clear_progress());
 
         fileMenu.add(selectMenuItem);
@@ -73,6 +78,41 @@ public class Interface extends JFrame{
         setJMenuBar(menubar);
     }
 
+    // creates the actions to be assigned to the buttons and key strokes
+    private void setActions(){
+        random = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display_random();
+            }
+        };
+        next = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display_next();
+            }
+        };
+        previous = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display_previous();
+            }
+        };
+        finding = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addLabel(1);
+            }
+        };
+        nofinding = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addLabel(0);
+            }
+        };
+    }
+
+    // creates button layout and sets image placeholder
     private void createLayout(){
 
         // defining all Layout items
@@ -88,16 +128,6 @@ public class Interface extends JFrame{
 
         current_file = new JLabel("Current Image:  ");
         current_label = new JLabel("Finding:  ");
-
-        Action next = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(e)
-                display_next();
-            }
-        };
-
-        // adding values to status labels
 
         var pane = getContentPane();
         var gl = new GroupLayout(pane);
@@ -145,18 +175,25 @@ public class Interface extends JFrame{
         pack();
 
         // adding actions to buttons
-        randomBtn.addActionListener((event) -> display_random());
-        randomBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "pressed");
-        nextBtn.addActionListener((event) -> display_next());
-        nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "pressed");
-        previousBtn.addActionListener((event) -> display_previous());
-        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "released");
-        findingBtn.addActionListener((event) -> addLabel(1));
-        findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "released");
-        nofindingBtn.addActionListener((event) -> addLabel(0));
-        nofindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "released");
-
+        randomBtn.addActionListener(random);
+        randomBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("R"), "random");
+        randomBtn.getActionMap().put("random", random);
+        nextBtn.addActionListener(next);
+        nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "next");
+        nextBtn.getActionMap().put("next", next);
+        previousBtn.addActionListener(previous);
+        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "previous");
+        previousBtn.getActionMap().put("previous", previous);
+        findingBtn.addActionListener(finding);
+        findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "finding");
+        findingBtn.getActionMap().put("finding", finding);
+        nofindingBtn.addActionListener(nofinding);
+        nofindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "nofinding");
+        nofindingBtn.getActionMap().put("nofinding", nofinding);
     }
+
+
+    // functions for displaying the images
 
     private void display_random(){
         if(this.data==null){
@@ -203,7 +240,7 @@ public class Interface extends JFrame{
     }
 
 
-    // Methods for handling Database: creating it, setting labels, saving and loading files
+    // Functions for handling data: creating database, setting labels, saving and loading files, clearing progress
 
     private void addLabel(int label){
         if(image_buffer.getPath().equals(placeholder)){
@@ -235,6 +272,7 @@ public class Interface extends JFrame{
         if (dialogResult == JOptionPane.YES_OPTION) {
             this.data.clear_previous_files();
             this.data.clear_labels();
+            this.display_random();
         }
     }
 
@@ -254,6 +292,7 @@ public class Interface extends JFrame{
         display_random();
     }
 
+
     // change status bar
     private void setStatus(){
         String filename = image_buffer.getName();
@@ -271,6 +310,7 @@ public class Interface extends JFrame{
         this.current_label.setText("Finding: " + label);
     }
 
+
     private WindowListener exit(){
         return new WindowAdapter() {
             @Override
@@ -287,6 +327,8 @@ public class Interface extends JFrame{
             }
         };
     }
+
+
 
     //Main method
 
