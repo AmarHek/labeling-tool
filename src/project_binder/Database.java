@@ -15,7 +15,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Database {
-    protected File img_dir;
+    private File img_dir;
     protected File[] image_files;
     protected Map<String, Integer> labels;
     protected ArrayList<File> previous;
@@ -92,7 +92,7 @@ public class Database {
         return next_image;
     }
 
-    protected void save_labels_to_json(File save_file){
+    protected void save_to_json(File save_file){
 
         JSONObject savefile = new JSONObject();
 
@@ -172,6 +172,7 @@ public class Database {
                 File file = new File(img_dir + '/' + filename);
                 this.add_label_entry(file, (int)label);
             }
+
         }
         catch (IOException ioe){
             System.err.println("Caught IOException" + ioe.getMessage());
