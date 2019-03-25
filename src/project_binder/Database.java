@@ -184,7 +184,7 @@ public class Database {
 
     public static void main(String[] args){
 
-        File test = new File("C:/Users/Amar/Git/xray-tinder/test.json");
+        File test = new File("C:/Users/Amar/Git/xray-labeler/test.json");
         Database data = new Database();
         data.load_from_json(test);
         for (File file: data.previous){
