@@ -15,7 +15,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Database {
-    private File img_dir;
+    protected File img_dir;
     protected File[] image_files;
     protected Map<String, Integer> labels;
     protected ArrayList<File> previous;

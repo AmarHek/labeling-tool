@@ -60,17 +60,18 @@ public class Interface extends JFrame{
         var menubar = new JMenuBar();
         var fileMenu = new JMenu("File");
 
-        //TODO Have "New" create a new file after choosing image directory
         var selectMenuItem = new JMenuItem("New");
         var saveasMenuItem = new JMenuItem("Save as");
         saveMenuItem = new JMenuItem("Save");
         var loadMenuItem = new JMenuItem("Load");
         var clearMenuItem = new JMenuItem("Clear");
 
-        selectMenuItem.addActionListener((event) -> set_database());
+        selectMenuItem.addActionListener((event) -> new_file());
         selectMenuItem.setMnemonic(KeyEvent.VK_N);
+        selectMenuItem.setToolTipText("Choose Directory and create new save file");
         saveasMenuItem.addActionListener((event) -> save_as());
         saveasMenuItem.setMnemonic(KeyEvent.VK_A);
+        saveasMenuItem.setToolTipText("Create ");
         saveMenuItem.addActionListener((event) -> save());
         saveMenuItem.setMnemonic(KeyEvent.VK_S);
         saveMenuItem.setEnabled(false);
@@ -82,6 +83,7 @@ public class Interface extends JFrame{
         fileMenu.add(selectMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(saveasMenuItem);
+        fileMenu.add(saveMenuItem);
         fileMenu.add(loadMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(clearMenuItem);
@@ -167,7 +169,7 @@ public class Interface extends JFrame{
                                     .addComponent(current_file)
                                     .addPreferredGap(RELATED, 20, 50)
                                     .addComponent(current_label)
-                                    .addPreferredGap(RELATED, 20, 50)
+                                    .addPreferredGap(RELATED, 20, 30)
                                     .addComponent(num_labeled))
         );
 
@@ -270,27 +272,40 @@ public class Interface extends JFrame{
         }
     }
 
-    private void set_database(){
+    private File check_json_extension(File file){
+        String path = file.getAbsolutePath();
+        if(path.endsWith(".json")){
+            return file;
+        }
+        else{
+            path = path + ".json";
+            return new File(path);
+        }
+    }
+
+
+    private void new_file(){
         int option = JOptionPane.showConfirmDialog(panel, "Choose image directory",
                 "Directory Dialog", JOptionPane.OK_CANCEL_OPTION);
-        if(option == JOptionPane.OK_OPTION){
+        if(option == JOptionPane.OK_OPTION) {
             JFileChooser chooser = new JFileChooser("./");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             option = chooser.showOpenDialog(panel);
-            if(option == JFileChooser.APPROVE_OPTION){
+            if (option == JFileChooser.APPROVE_OPTION) {
                 File img_dir = chooser.getSelectedFile();
                 data = new Database(img_dir);
-            }
-            chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-            option = chooser.showSaveDialog(panel);
-            if(option == JFileChooser.APPROVE_OPTION){
-                File savefile = chooser.getSelectedFile();
-                this.save_file = savefile;
-                this.data.save_to_json(savefile);
-                this.saveMenuItem.setEnabled(true);
+                chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                option = chooser.showSaveDialog(panel);
+                if (option == JFileChooser.APPROVE_OPTION) {
+                    File savefile = chooser.getSelectedFile();
+                    savefile = check_json_extension(savefile);
+                    this.save_file = savefile;
+                    this.data.save_to_json(savefile);
+                    this.saveMenuItem.setEnabled(true);
+                    this.display_random();
+                }
             }
         }
-
     }
 
     private void clear_progress(){
@@ -314,6 +329,7 @@ public class Interface extends JFrame{
         var option = chooser.showSaveDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File savefile = chooser.getSelectedFile();
+            savefile = check_json_extension(savefile);
             this.data.save_to_json(savefile);
             this.save_file = savefile;
             this.saveMenuItem.setEnabled(true);
@@ -329,7 +345,7 @@ public class Interface extends JFrame{
     private void open(){
         String default_directory;
         if(this.save_file != null){
-            default_directory = this.save_file.getAbsolutePath();
+            default_directory = this.data.img_dir.getAbsolutePath();
         }
         else{
             default_directory = "./";
@@ -364,31 +380,21 @@ public class Interface extends JFrame{
         this.num_labeled.setText("Labeled Files: " + num_labeled);
     }
 
-
+    //TODO add attributes for savefile states
     private WindowListener exit(){
-        if(this.data != null) {
-            return new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    int result = JOptionPane.showConfirmDialog(panel,
-                            "Do you want to save your progress before exiting?");
-                    if (result == JOptionPane.YES_OPTION) {
-                        save_as();
-                        System.exit(0);
-                    } else if (result == JOptionPane.NO_OPTION) {
-                        System.exit(0);
-                    }
-                }
-            };
-        }
-        else{
-            return new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
+        return new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                int result = JOptionPane.showConfirmDialog(panel,
+                        "Do you want to save your progress before exiting?");
+                if (result == JOptionPane.YES_OPTION) {
+                    save_as();
+                    System.exit(0);
+                } else if (result == JOptionPane.NO_OPTION) {
                     System.exit(0);
                 }
-            };
-        }
+            }
+        };
     }
 
 
