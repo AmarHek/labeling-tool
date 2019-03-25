@@ -44,7 +44,7 @@ public class Interface extends JFrame{
         setActions();
         createLayout();
 
-        this.setTitle("XRay-Tinder");
+        this.setTitle("XRay-Labeler");
         //TODO: Variable size
         //setSize(1000, 800);
         this.setLocationRelativeTo(null);
@@ -71,14 +71,17 @@ public class Interface extends JFrame{
         selectMenuItem.setToolTipText("Choose Directory and create new save file");
         saveasMenuItem.addActionListener((event) -> save_as());
         saveasMenuItem.setMnemonic(KeyEvent.VK_A);
-        saveasMenuItem.setToolTipText("Create ");
+        saveasMenuItem.setToolTipText("Save data to a new file");
         saveMenuItem.addActionListener((event) -> save());
         saveMenuItem.setMnemonic(KeyEvent.VK_S);
         saveMenuItem.setEnabled(false);
+        saveMenuItem.setToolTipText("Save data to current file");
         loadMenuItem.addActionListener((event) -> open());
         loadMenuItem.setMnemonic(KeyEvent.VK_L);
+        loadMenuItem.setToolTipText("Load data and database from a saved file");
         clearMenuItem.addActionListener((event) -> clear_progress());
         clearMenuItem.setMnemonic(KeyEvent.VK_C);
+        clearMenuItem.setToolTipText("Resets memory of already labeled images and clears all set labels");
 
         fileMenu.add(selectMenuItem);
         fileMenu.addSeparator();
@@ -209,6 +212,13 @@ public class Interface extends JFrame{
         nofindingBtn.addActionListener(nofinding);
         nofindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "nofinding");
         nofindingBtn.getActionMap().put("nofinding", nofinding);
+
+
+        randomBtn.setToolTipText("Displays a random image");
+        nextBtn.setToolTipText("Displays next image in line or a random one");
+        previousBtn.setToolTipText("Displays previous image (or random if none labeled)");
+        findingBtn.setToolTipText("Mark image as 'finding detected'");
+        nofindingBtn.setToolTipText("Mark image as 'no finding detected'");
     }
 
 
