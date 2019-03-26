@@ -10,13 +10,15 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/json-simple-1.1.jar.zip!/" />
+          <root url="file://$MODULE_DIR$/lib" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="jar://$MODULE_DIR$/lib/json-simple-1.1.jar.zip!/" recursive="false" />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/lib" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="com.googlecode.json-simple:json-simple:1.1.1" level="project" />
   </component>
 </module>
