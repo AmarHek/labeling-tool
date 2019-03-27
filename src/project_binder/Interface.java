@@ -57,14 +57,14 @@ public class Interface extends JFrame{
 
     // sets the menu bar and respective actions
     private void createMenuBar(){
-        var menubar = new JMenuBar();
-        var fileMenu = new JMenu("File");
+        JMenuBar menubar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
 
-        var selectMenuItem = new JMenuItem("New");
-        var saveasMenuItem = new JMenuItem("Save as");
+        JMenuItem selectMenuItem = new JMenuItem("New");
+        JMenuItem saveasMenuItem = new JMenuItem("Save as");
         saveMenuItem = new JMenuItem("Save");
-        var loadMenuItem = new JMenuItem("Load");
-        var clearMenuItem = new JMenuItem("Clear");
+        JMenuItem loadMenuItem = new JMenuItem("Load");
+        JMenuItem clearMenuItem = new JMenuItem("Clear");
 
         selectMenuItem.addActionListener((event) -> new_file());
         selectMenuItem.setMnemonic(KeyEvent.VK_N);
@@ -148,8 +148,8 @@ public class Interface extends JFrame{
         current_label = new JLabel("Finding:  ");
         num_labeled = new JLabel("Labeled Files: 0");
 
-        var pane = getContentPane();
-        var gl = new GroupLayout(pane);
+        Container pane = getContentPane();
+        GroupLayout gl = new GroupLayout(pane);
         pane.setLayout(gl);
 
         gl.setAutoCreateContainerGaps(true);
@@ -336,7 +336,7 @@ public class Interface extends JFrame{
 
     private void save_as(){
         JFileChooser chooser = new JFileChooser("./");
-        var option = chooser.showSaveDialog(panel);
+        int option = chooser.showSaveDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File savefile = chooser.getSelectedFile();
             savefile = check_json_extension(savefile);
@@ -361,7 +361,7 @@ public class Interface extends JFrame{
             default_directory = "./";
         }
         JFileChooser chooser = new JFileChooser(default_directory);
-        var option = chooser.showOpenDialog(panel);
+        int option = chooser.showOpenDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File savefile = chooser.getSelectedFile();
             this.data = new Database();
@@ -412,8 +412,9 @@ public class Interface extends JFrame{
     //Main method
 
     public static void main(String[] args){
+        java.util.Locale.setDefault(java.util.Locale.ENGLISH);
          EventQueue.invokeLater(() -> {
-             var ex = new Interface();
+             Interface ex = new Interface();
              ex.setVisible(true);
          });
     }
