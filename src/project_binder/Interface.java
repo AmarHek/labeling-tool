@@ -16,6 +16,7 @@ public class Interface extends JFrame{
     // image variables
     private JLabel image_label;
     private File image_buffer;
+    private File latest_image;
 
     private File save_file;
 
@@ -60,7 +61,8 @@ public class Interface extends JFrame{
         JMenuBar menubar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
 
-        JMenuItem selectMenuItem = new JMenuItem("New");
+        JMenuItem selectMenuItem = new JMenuItem("New File");
+        JMenuItem setdatabaseMenuItem = new JMenuItem("Set Database");
         JMenuItem saveasMenuItem = new JMenuItem("Save as");
         saveMenuItem = new JMenuItem("Save");
         JMenuItem loadMenuItem = new JMenuItem("Load");
@@ -69,7 +71,10 @@ public class Interface extends JFrame{
         selectMenuItem.addActionListener((event) -> new_file());
         selectMenuItem.setMnemonic(KeyEvent.VK_N);
         selectMenuItem.setToolTipText("Choose Directory and create new save file");
-        saveasMenuItem.addActionListener((event) -> save_as());
+        setdatabaseMenuItem.addActionListener((event) -> setDatabase());
+        selectMenuItem.setMnemonic(KeyEvent.VK_D);
+        selectMenuItem.setToolTipText("Set a new directory to load the images from");
+        saveasMenuItem.addActionListener((event) -> save_as(false));
         saveasMenuItem.setMnemonic(KeyEvent.VK_A);
         saveasMenuItem.setToolTipText("Save data to a new file");
         saveMenuItem.addActionListener((event) -> save());
@@ -84,6 +89,7 @@ public class Interface extends JFrame{
         clearMenuItem.setToolTipText("Resets memory of already labeled images and clears all set labels");
 
         fileMenu.add(selectMenuItem);
+        fileMenu.add(setdatabaseMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(saveasMenuItem);
         fileMenu.add(saveMenuItem);
@@ -223,6 +229,34 @@ public class Interface extends JFrame{
 
 
     // functions for displaying the images
+    private void setImage(File image){
+        try {
+            this.image_label.setIcon(new ImageIcon(image.getPath()));
+            this.setStatus(image);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "File not found");
+            System.out.println(e);
+        }
+    }
+
+    // change status bar
+    private void setStatus(File image){
+        String filename = image.getName();
+        String label;
+        String num_labeled = Integer.toString(this.data.previous.size());
+        if(!data.previous.contains(image)){
+            label = " ";
+        }
+        else if(data.labels.get(image.getName()) == 0){
+            label = "No";
+        }
+        else{
+            label = "Yes";
+        }
+        this.current_file.setText("Current File: " + filename);
+        this.current_label.setText("Finding: " + label);
+        this.num_labeled.setText("Labeled Files: " + num_labeled);
+    }
 
     private void display_random(){
         if(this.data==null){
@@ -232,26 +266,17 @@ public class Interface extends JFrame{
         else{
             this.data.resetCounter();
             image_buffer = this.data.get_random_file();
-            try {
-            this.image_label.setIcon(new ImageIcon(image_buffer.getPath()));
-            this.setStatus();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "File not found");
-                System.out.println(e);
-            }
+            latest_image = image_buffer;
+            this.setImage(image_buffer);
         }
     }
 
     private void display_previous(){
         this.data.incrementCounter();
         int len = this.data.previous.size();
-        if (data.previous.isEmpty() || data.get_previous_counter() > len) {
-            display_random();
-        }
-        else{
+        if (!data.previous.isEmpty() || data.get_previous_counter() > len) {
             image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
-            this.image_label.setIcon(new ImageIcon(image_buffer.getPath()));
-            this.setStatus();
+            this.setImage(image_buffer);
         }
     }
 
@@ -259,12 +284,13 @@ public class Interface extends JFrame{
         this.data.decrementCounter();
         int len = this.data.previous.size();
         if (data.get_previous_counter() == 0) {
-            display_random();
+            setImage(latest_image);
         }
-        else{
-            image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
-            this.image_label.setIcon(new ImageIcon(image_buffer.getPath()));
-            this.setStatus();
+        else {
+            if (data.get_previous_counter() > 0) {
+                image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
+                this.setImage(image_buffer);
+            }
         }
     }
 
@@ -293,35 +319,70 @@ public class Interface extends JFrame{
         }
     }
 
+    private void save(){
+        if(this.save_file != null) {
+            this.data.save_to_json(this.save_file);
+        }
+    }
 
-    private void new_file(){
-        int option = JOptionPane.showConfirmDialog(panel, "Choose image directory",
-                "Directory Dialog", JOptionPane.OK_CANCEL_OPTION);
+    private void save_as(boolean showDialog){
+        int option;
+        if(showDialog){
+            option = JOptionPane.showConfirmDialog(null,
+                    "Choose a location for your save file.",
+                    "Save Dialog", JOptionPane.OK_CANCEL_OPTION);
+        }
+        else{
+            option = JOptionPane.OK_OPTION;
+        }
         if(option == JOptionPane.OK_OPTION) {
+            JFileChooser chooser = new JFileChooser("./");
+            option = chooser.showSaveDialog(panel);
+            if (option == JFileChooser.APPROVE_OPTION) {
+                File savefile = chooser.getSelectedFile();
+                savefile = check_json_extension(savefile);
+                this.data.save_to_json(savefile);
+                this.save_file = savefile;
+                this.saveMenuItem.setEnabled(true);
+            }
+        }
+    }
+
+    private void setDatabase(){
+        int option;
+        if (this.data != null){
+            option = JOptionPane.showConfirmDialog(panel,
+                    "Database already exists. Do you still want to change it?",
+                        "Confirm Dialog", JOptionPane.OK_CANCEL_OPTION);
+        }
+        else{
+            option = JOptionPane.showConfirmDialog(panel, "Choose image directory",
+                    "Directory Dialog", JOptionPane.OK_CANCEL_OPTION);
+        }
+        if (option == JOptionPane.OK_OPTION) {
             JFileChooser chooser = new JFileChooser("./");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             option = chooser.showOpenDialog(panel);
             if (option == JFileChooser.APPROVE_OPTION) {
                 File img_dir = chooser.getSelectedFile();
                 data = new Database(img_dir);
-                chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                option = chooser.showSaveDialog(panel);
-                if (option == JFileChooser.APPROVE_OPTION) {
-                    File savefile = chooser.getSelectedFile();
-                    savefile = check_json_extension(savefile);
-                    this.save_file = savefile;
-                    this.data.save_to_json(savefile);
-                    this.saveMenuItem.setEnabled(true);
-                    this.display_random();
-                }
             }
+        }
+    }
+
+    private void new_file(){
+        if (this.data == null) {
+            this.setDatabase();
+        }
+        if (this.data != null) {
+            this.save_as(true);
         }
     }
 
     private void clear_progress(){
         if(this.data == null){
-            JOptionPane.showMessageDialog(panel, "Please first create a database from File: New.",
-                    "Missing Database", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(panel, "No database to clear.",
+                    "Missing Database", JOptionPane.INFORMATION_MESSAGE);
         }
         else {
             int dialogResult = JOptionPane.showConfirmDialog(panel, "Clear all progress?",
@@ -331,24 +392,6 @@ public class Interface extends JFrame{
                 this.data.clear_labels();
                 this.display_random();
             }
-        }
-    }
-
-    private void save_as(){
-        JFileChooser chooser = new JFileChooser("./");
-        int option = chooser.showSaveDialog(panel);
-        if(option == JFileChooser.APPROVE_OPTION){
-            File savefile = chooser.getSelectedFile();
-            savefile = check_json_extension(savefile);
-            this.data.save_to_json(savefile);
-            this.save_file = savefile;
-            this.saveMenuItem.setEnabled(true);
-        }
-    }
-
-    private void save(){
-        if(this.save_file != null) {
-            this.data.save_to_json(this.save_file);
         }
     }
 
@@ -371,26 +414,7 @@ public class Interface extends JFrame{
         }
     }
 
-    // change status bar
-    private void setStatus(){
-        String filename = image_buffer.getName();
-        String label;
-        String num_labeled = Integer.toString(this.data.previous.size());
-        if(!data.previous.contains(image_buffer)){
-            label = " ";
-        }
-        else if(data.labels.get(image_buffer.getName()) == 0){
-            label = "No";
-        }
-        else{
-            label = "Yes";
-        }
-        this.current_file.setText("Current File: " + filename);
-        this.current_label.setText("Finding: " + label);
-        this.num_labeled.setText("Labeled Files: " + num_labeled);
-    }
 
-    //TODO add attributes for savefile states
     private WindowListener exit(){
         return new WindowAdapter() {
             @Override
@@ -398,7 +422,7 @@ public class Interface extends JFrame{
                 int result = JOptionPane.showConfirmDialog(panel,
                         "Do you want to save your progress before exiting?");
                 if (result == JOptionPane.YES_OPTION) {
-                    save_as();
+                    save_as(false);
                     System.exit(0);
                 } else if (result == JOptionPane.NO_OPTION) {
                     System.exit(0);

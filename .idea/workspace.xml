@@ -7,10 +7,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5b353e5b-aba4-4fb8-923c-c0addc22886c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/XRay-Labeler.iml" beforeDir="false" afterPath="$PROJECT_DIR$/XRay-Labeler.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$4.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$5.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$6.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/project_binder/Interface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/project_binder/Interface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xray-labeler.jar" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -24,7 +31,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/project_binder/Database.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="155">
+            <state relative-caret-position="170">
               <caret line="21" column="9" selection-start-line="21" selection-start-column="9" selection-end-line="21" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -36,16 +43,23 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/project_binder/Interface.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="396">
-              <caret line="421" selection-start-line="421" selection-end-line="421" />
+            <state relative-caret-position="285">
+              <caret line="285" column="36" lean-forward="true" selection-start-line="285" selection-start-column="36" selection-end-line="285" selection-end-column="36" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#15246#15756#0" expanded="true" />
+                <element signature="e#15755#15756#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>setStatus</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -59,8 +73,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="326" />
-    <option name="y" value="-13" />
+    <option name="x" value="2368" />
+    <option name="y" value="-8" />
     <option name="width" value="1612" />
     <option name="height" value="876" />
   </component>
@@ -69,6 +83,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -91,8 +107,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -102,8 +116,8 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553697085448" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/lib" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1557407933960" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../py_unit_test_corrector" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="SDKs" />
@@ -150,6 +164,28 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="xray-labeler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Interface" />
@@ -170,17 +206,22 @@
       <workItem from="1553529388954" duration="1104000" />
       <workItem from="1553603268668" duration="2756000" />
       <workItem from="1553696058774" duration="1620000" />
+      <workItem from="1557152065128" duration="599000" />
+      <workItem from="1557230614787" duration="2026000" />
+      <workItem from="1557235275129" duration="663000" />
+      <workItem from="1557240015693" duration="17000" />
+      <workItem from="1557306128586" duration="8723000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5480000" />
+    <option name="totallyTimeSpent" value="17508000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="1912" y="-8" width="1696" height="1026" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25586355" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17542787" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -189,8 +230,8 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info id="Learn" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4084507" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.28219485" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.11086226" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -198,9 +239,10 @@
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="10" weight="0.32936078" />
+      <window_info active="true" anchor="bottom" id="Messages" order="10" visible="true" weight="0.32922733" />
       <window_info anchor="bottom" id="Database Changes" order="11" />
       <window_info anchor="bottom" id="Version Control" order="12" />
+      <window_info anchor="right" x="0" y="0" width="374" height="826" id="Documentation" side_tool="true" visible="true" weight="0.25794622" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -210,6 +252,7 @@
       <window_info anchor="right" id="Database" order="6" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="right" id="Theme Preview" order="8" />
+      <window_info anchor="right" id="SciView" order="9" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,7 +262,7 @@
     <entry file="file://$PROJECT_DIR$/src/sample/Main.java" />
     <entry file="file://$PROJECT_DIR$/src/project_binder/Database.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
+        <state relative-caret-position="170">
           <caret line="21" column="9" selection-start-line="21" selection-start-column="9" selection-end-line="21" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -229,10 +272,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/project_binder/Interface.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="421" selection-start-line="421" selection-end-line="421" />
+        <state relative-caret-position="285">
+          <caret line="285" column="36" lean-forward="true" selection-start-line="285" selection-start-column="36" selection-end-line="285" selection-end-column="36" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#15246#15756#0" expanded="true" />
+            <element signature="e#15755#15756#0" expanded="true" />
           </folding>
         </state>
       </provider>
