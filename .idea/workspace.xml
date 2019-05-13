@@ -6,19 +6,7 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5b353e5b-aba4-4fb8-923c-c0addc22886c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/XRay-Labeler.iml" beforeDir="false" afterPath="$PROJECT_DIR$/XRay-Labeler.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface$6.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/XRay-Labeler/project_binder/Interface.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/project_binder/Interface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/project_binder/Interface.java" afterDir="false" />
-    </list>
+    <list default="true" id="5b353e5b-aba4-4fb8-923c-c0addc22886c" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,8 +31,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/project_binder/Interface.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="285" column="36" lean-forward="true" selection-start-line="285" selection-start-column="36" selection-end-line="285" selection-end-column="36" />
+            <state relative-caret-position="204">
+              <caret line="147" lean-forward="true" selection-start-line="147" selection-end-line="147" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#15246#15756#0" expanded="true" />
@@ -116,7 +104,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1557407933960" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1557732038062" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../py_unit_test_corrector" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -210,12 +198,12 @@
       <workItem from="1557230614787" duration="2026000" />
       <workItem from="1557235275129" duration="663000" />
       <workItem from="1557240015693" duration="17000" />
-      <workItem from="1557306128586" duration="8723000" />
+      <workItem from="1557306128586" duration="10489000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17508000" />
+    <option name="totallyTimeSpent" value="19274000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="1696" height="1026" extended-state="6" />
@@ -231,7 +219,7 @@
       <window_info id="Learn" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.28219485" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.11086226" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.11086226" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -239,7 +227,7 @@
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Messages" order="10" visible="true" weight="0.32922733" />
+      <window_info anchor="bottom" id="Messages" order="10" weight="0.32922733" />
       <window_info anchor="bottom" id="Database Changes" order="11" />
       <window_info anchor="bottom" id="Version Control" order="12" />
       <window_info anchor="right" x="0" y="0" width="374" height="826" id="Documentation" side_tool="true" visible="true" weight="0.25794622" />
@@ -272,8 +260,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/project_binder/Interface.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="285" column="36" lean-forward="true" selection-start-line="285" selection-start-column="36" selection-end-line="285" selection-end-column="36" />
+        <state relative-caret-position="204">
+          <caret line="147" lean-forward="true" selection-start-line="147" selection-end-line="147" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#15246#15756#0" expanded="true" />
