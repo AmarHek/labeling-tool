@@ -1,10 +1,15 @@
 package project_binder;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static javax.swing.LayoutStyle.ComponentPlacement.*;
 
@@ -18,6 +23,8 @@ public class Interface extends JFrame{
     private File image_buffer;
     private File latest_image;
 
+    private JCheckBox[] labels_box;
+
     private File save_file;
 
     // actions
@@ -26,8 +33,14 @@ public class Interface extends JFrame{
     private Action previous;
     private Action finding;
     private Action nofinding;
+    //private Action binary;
+    //private Action multi_label;
 
     private JMenuItem saveMenuItem;
+    //private JRadioButtonMenuItem binary_item;
+    //private JRadioButtonMenuItem multi_label_item;
+
+    //private int mode = 1; // 0 = binary_item, 1 = multi_label_item
 
     private JLabel current_file;
     private JLabel current_label;
@@ -60,6 +73,7 @@ public class Interface extends JFrame{
     private void createMenuBar(){
         JMenuBar menubar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
+        //JMenu modeMenu = new JMenu("Mode");
 
         JMenuItem selectMenuItem = new JMenuItem("New File");
         JMenuItem setdatabaseMenuItem = new JMenuItem("Set Database");
@@ -67,6 +81,9 @@ public class Interface extends JFrame{
         saveMenuItem = new JMenuItem("Save");
         JMenuItem loadMenuItem = new JMenuItem("Load");
         JMenuItem clearMenuItem = new JMenuItem("Clear");
+
+        //binary_item = new JRadioButtonMenuItem("Binary");
+        //multi_label_item = new JRadioButtonMenuItem("Multi-Label");
 
         selectMenuItem.addActionListener((event) -> new_file());
         selectMenuItem.setMnemonic(KeyEvent.VK_N);
@@ -97,7 +114,11 @@ public class Interface extends JFrame{
         fileMenu.addSeparator();
         fileMenu.add(clearMenuItem);
 
+        //modeMenu.add(binary_item);
+        //modeMenu.add(multi_label_item);
+
         menubar.add(fileMenu);
+        //menubar.add(modeMenu);
 
         setJMenuBar(menubar);
     }
@@ -125,15 +146,31 @@ public class Interface extends JFrame{
         finding = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addLabel(1);
+                String[] findings = get_findings();
+                if(check_empty(findings)) {
+                    addLabel(1, findings);
+                }
             }
         };
         nofinding = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addLabel(0);
+                String[] findings = {};
+                addLabel(0, findings);
             }
         };
+        //binary = new AbstractAction() {
+        //    @Override
+        //    public void actionPerformed(ActionEvent e) {
+        //        mode = 0;
+        //    }
+        //};
+        //multi_label = new AbstractAction() {
+        //    @Override
+        //    public void actionPerformed(ActionEvent e) {
+        //        mode = 1;
+        //    }
+        //};
     }
 
     // creates button layout and sets image placeholder
@@ -145,6 +182,15 @@ public class Interface extends JFrame{
         JButton previousBtn = new JButton("Previous");
         JButton findingBtn = new JButton("Finding");
         JButton nofindingBtn = new JButton("No Finding");
+
+        String[] labels = {"Cardiomegaly", "Emphysema", "Effusion", "Hernia", "Infiltration", "Mass", "Nodule",
+        "Atelectasis", "Pleural_Thickening", "Pneumothorax", "Pneumonia", "Fibrosis", "Edema", "Consolidation"};
+
+        labels_box = new JCheckBox[labels.length];
+
+        for(int i=0; i<14; i++){
+            labels_box[i] = new JCheckBox(labels[i]);
+        }
 
         placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
@@ -164,37 +210,50 @@ public class Interface extends JFrame{
         //TODO: Improve Layout -> Dynamic
 
         // Creating the Layout
+
+        GroupLayout.ParallelGroup pGroup = gl.createParallelGroup();
+        GroupLayout.SequentialGroup sGroup = gl.createSequentialGroup();
+
+        for(JCheckBox box : labels_box){
+            pGroup.addComponent(box);
+            sGroup.addComponent(box);
+        }
+
         gl.setHorizontalGroup(
-                gl.createParallelGroup()
+                gl.createSequentialGroup()
+                    .addGroup(gl.createParallelGroup()
                         .addGroup(gl.createSequentialGroup()
                                     .addComponent(randomBtn)
                                     .addComponent(previousBtn)
                                     .addComponent(nextBtn)
                                     .addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(findingBtn)
-                                    .addComponent(nofindingBtn))
+                                    .addComponent(nofindingBtn)
+                                    .addComponent(findingBtn))
                         .addComponent(image_label)
                         .addGroup(gl.createSequentialGroup()
                                     .addComponent(current_file)
-                                    .addPreferredGap(RELATED, 20, 50)
+                                    .addPreferredGap(RELATED, 20, 100)
                                     .addComponent(current_label)
-                                    .addPreferredGap(RELATED, 20, 30)
-                                    .addComponent(num_labeled))
+                                    .addPreferredGap(RELATED, 20, 100)
+                                    .addComponent(num_labeled)))
+                    .addGroup(pGroup)
         );
 
         gl.setVerticalGroup(
-                gl.createSequentialGroup()
+                gl.createParallelGroup()
+                    .addGroup(gl.createSequentialGroup()
                         .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(randomBtn)
                                 .addComponent(nextBtn)
                                 .addComponent(previousBtn)
-                                .addComponent(findingBtn)
-                                .addComponent(nofindingBtn))
+                                .addComponent(nofindingBtn)
+                                .addComponent(findingBtn))
                         .addComponent(image_label)
                         .addGroup(gl.createParallelGroup()
                                 .addComponent(current_file)
                                 .addComponent(current_label)
-                                .addComponent(num_labeled))
+                                .addComponent(num_labeled)))
+                    .addGroup(sGroup)
         );
 
         gl.linkSize(randomBtn, nextBtn, previousBtn, findingBtn, nofindingBtn);
@@ -210,8 +269,8 @@ public class Interface extends JFrame{
         nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "next");
         nextBtn.getActionMap().put("next", next);
         previousBtn.addActionListener(previous);
-        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "previous");
-        previousBtn.getActionMap().put("previous", previous);
+        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "labeled");
+        previousBtn.getActionMap().put("labeled", previous);
         findingBtn.addActionListener(finding);
         findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "finding");
         findingBtn.getActionMap().put("finding", finding);
@@ -222,8 +281,9 @@ public class Interface extends JFrame{
 
         randomBtn.setToolTipText("Displays a random image");
         nextBtn.setToolTipText("Displays next image in line or a random one");
-        previousBtn.setToolTipText("Displays previous image (or random if none labeled)");
-        findingBtn.setToolTipText("Mark image as 'finding detected'");
+        previousBtn.setToolTipText("Displays labeled image (or random if none labeled)");
+        findingBtn.setToolTipText("Mark image as 'finding detected' " +
+                "and add all checked findings (at least one required)");
         nofindingBtn.setToolTipText("Mark image as 'no finding detected'");
     }
 
@@ -243,8 +303,8 @@ public class Interface extends JFrame{
     private void setStatus(File image){
         String filename = image.getName();
         String label;
-        String num_labeled = Integer.toString(this.data.previous.size());
-        if(!data.previous.contains(image)){
+        String num_labeled = Integer.toString(this.data.labeled.size());
+        if(!data.labeled.contains(image)){
             label = " ";
         }
         else if(data.labels.get(image.getName()) == 0){
@@ -258,52 +318,108 @@ public class Interface extends JFrame{
         this.num_labeled.setText("Labeled Files: " + num_labeled);
     }
 
+    private void setCheckboxes(File image) {
+        String[] findings = this.data.get_findings(image);
+        for (JCheckBox box : this.labels_box) {
+            if(Arrays.asList(findings).contains(box.getText())) {
+                box.setSelected(true);
+            }
+            else {
+                box.setSelected(false);
+            }
+        }
+    }
+
+    private void resetCheckboxes() {
+        for(JCheckBox box : this.labels_box){
+            box.setSelected(false);
+        }
+    }
+
+    // TODO: Add resizing for large images
+    // TODO: reload frame auslagern/verbessern
     private void display_random(){
         if(this.data==null){
             JOptionPane.showMessageDialog(panel, "Please first create a database from File: New.",
                     "Missing Database", JOptionPane.WARNING_MESSAGE);
         }
-        else{
+        else {
             this.data.resetCounter();
-            image_buffer = this.data.get_random_file();
-            latest_image = image_buffer;
-            this.setImage(image_buffer);
+            resetCheckboxes();
+            try {
+                BufferedImage bimg_old = ImageIO.read(image_buffer);
+                image_buffer = this.data.get_random_file();
+                BufferedImage bimg_new = ImageIO.read(image_buffer);
+                latest_image = image_buffer;
+                this.setImage(image_buffer);
+                if (bimg_old.getWidth() != bimg_new.getWidth() || bimg_old.getHeight() != bimg_new.getHeight()) {
+                    this.setVisible(false);
+                    this.setVisible(true);
+                }
+            }
+            catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
         }
     }
 
     private void display_previous(){
         this.data.incrementCounter();
-        int len = this.data.previous.size();
-        if (!data.previous.isEmpty() || data.get_previous_counter() > len) {
-            image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
+        int len = this.data.labeled.size();
+        if (!data.labeled.isEmpty() || data.get_labeled_counter() > len) {
+            image_buffer = this.data.labeled.get(len - this.data.get_labeled_counter());
             this.setImage(image_buffer);
+            this.setCheckboxes(image_buffer);
+            }
         }
-    }
 
     private void display_next(){
         this.data.decrementCounter();
-        int len = this.data.previous.size();
-        if (data.get_previous_counter() == 0) {
+        int len = this.data.labeled.size();
+        if (data.get_labeled_counter() == 0) {
             setImage(latest_image);
+            image_buffer = latest_image;
+            resetCheckboxes();
         }
         else {
-            if (data.get_previous_counter() > 0) {
-                image_buffer = this.data.previous.get(len - this.data.get_previous_counter());
+            if (data.get_labeled_counter() > 0) {
+                image_buffer = this.data.labeled.get(len - this.data.get_labeled_counter());
                 this.setImage(image_buffer);
+                this.setCheckboxes(image_buffer);
             }
         }
     }
 
-
     // Functions for handling data: creating database, setting labels, saving and loading files, clearing progress
+    private String[] get_findings(){
+        ArrayList<String> findings = new ArrayList<>();
+        for(JCheckBox box : this.labels_box){
+            if(box.isEnabled()){
+                findings.add(box.getText());
+            }
+        }
+        return findings.toArray(new String[findings.size()]);
+    }
 
-    private void addLabel(int label){
+    private boolean check_empty(String[] findings){
+        if(findings.length == 0){
+            JOptionPane.showMessageDialog(null,
+                    "You must check at least one finding before pressing 'Finding'!",
+                    "No Finding", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
+    private void addLabel(int label, String[] findings){
         if(image_buffer.getPath().equals(placeholder)){
             JOptionPane.showMessageDialog(null, "No suitable image selected yet.",
                     "No Image", JOptionPane.WARNING_MESSAGE);
         }
         else{
-            this.data.add_label_entry(image_buffer, label);
+            this.data.add_label_entry(image_buffer, label, findings);
             display_random();
         }
     }
@@ -366,6 +482,7 @@ public class Interface extends JFrame{
             if (option == JFileChooser.APPROVE_OPTION) {
                 File img_dir = chooser.getSelectedFile();
                 data = new Database(img_dir);
+                this.display_random();
             }
         }
     }

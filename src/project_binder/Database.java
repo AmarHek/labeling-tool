@@ -1,6 +1,5 @@
 package project_binder;
 
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
@@ -16,80 +15,88 @@ import org.json.simple.parser.ParseException;
 
 public class Database {
     protected File img_dir;
-    protected File[] image_files;
+    protected ArrayList<File> image_files;
     protected Map<String, Integer> labels;
-    protected ArrayList<File> previous;
-    private int previous_counter;
+    protected ArrayList<File> labeled;
+    protected Map<String, String[]> findings;
+    private int labeled_counter;
 
     // static Scanner scanner = new Scanner(System.in);
 
     public Database(File img_dir){
         this.img_dir = img_dir;
-        this.image_files = img_dir.listFiles();
+        image_files = new ArrayList<>();
+        File[] files = img_dir.listFiles();
+        Collections.addAll(image_files, files);
         this.labels = new HashMap<>();
-        this.previous = new ArrayList<>();
-        this.previous_counter = 0;
+        this.findings = new HashMap<>();
+        this.labeled = new ArrayList<>();
+        this.labeled_counter = 0;
     }
 
     public Database(){
         this.labels = new HashMap<>();
-        this.previous = new ArrayList<>();
-        this.previous_counter = 0;
+        this.labeled = new ArrayList<>();
+        this.labeled_counter = 0;
     }
 
     protected void set_images(File img_dir){
         this.img_dir = img_dir;
-        this.image_files = img_dir.listFiles();
+        this.reset_images();
     }
 
-    protected void add_label_entry(File file, int label){
+    protected void reset_images() {
+        image_files.clear();
+        File[] files = img_dir.listFiles();
+        Collections.addAll(image_files, files);
+    }
+
+    protected void add_label_entry(File file, int label, String[] findings){
         String file_name = file.getName();
         this.labels.put(file_name, label);
-        if(!this.previous.contains(file)){
-            add_previous_file(file);
+        this.findings.put(file_name, findings);
+        if(!this.labeled.contains(file)){
+            this.labeled.add(file);
+            this.image_files.remove(file);
         }
     }
 
-    protected int get_previous_counter(){
-        return previous_counter;
+    protected int get_labeled_counter(){
+        return labeled_counter;
     }
 
     protected void resetCounter(){
-        previous_counter = 0;
+        labeled_counter = 0;
     }
 
     protected void incrementCounter(){
-        if(previous_counter < previous.size())
-        previous_counter++;
+        if(labeled_counter < labeled.size())
+        labeled_counter++;
     }
 
     protected void decrementCounter(){
-        if(previous_counter > 0) {
-            previous_counter--;
+        if(labeled_counter > 0) {
+            labeled_counter--;
         }
     }
 
     protected void clear_labels(){
         labels.clear();
-    }
-
-    protected void add_previous_file(File file_name){
-        this.previous.add(file_name);
+        findings.clear();
     }
 
     protected void clear_previous_files(){
-        this.previous.clear();
+        this.labeled.clear();
     }
 
     protected File get_random_file(){
         Random generator = new Random();
-        int randomIndex = generator.nextInt(this.image_files.length);
-        File next_image = this.image_files[randomIndex];
-        while (this.previous.contains(next_image)){
-            randomIndex = generator.nextInt(this.image_files.length);
-            next_image = this.image_files[randomIndex];
-        }
-        return next_image;
+        int randomIndex = generator.nextInt(this.image_files.size());
+        return this.image_files.get(randomIndex);
+    }
+
+    protected String[] get_findings(File file){
+        return this.findings.get(file.getName());
     }
 
     protected void save_to_json(File save_file){
@@ -99,26 +106,32 @@ public class Database {
         Map meta = new LinkedHashMap(4);
 
         meta.put("image directory", this.img_dir.getAbsolutePath());
-        meta.put("number of checked files", previous.size());
+        meta.put("number of checked files", labeled.size());
 
         int num_findings = 0;
-        for(File file: previous){
+        for(File file: labeled){
             num_findings += labels.get(file.getName());
         }
 
         meta.put("number of 'finding'", num_findings);
-        meta.put("number of 'no finding'", previous.size() - num_findings);
+        meta.put("number of 'no finding'", labeled.size() - num_findings);
 
         savefile.put("Metadata", meta);
 
         JSONArray file_entries = new JSONArray();
 
-        for(File file: previous){
+
+        // TODO: check if findings are added correctly
+        for(File file: labeled){
             Map m = new LinkedHashMap(2);
             String filename = file.getName();
             int label = labels.get(filename);
+            String[] findings = this.findings.get(filename);
+            JSONArray js_findings = new JSONArray();
+            js_findings.addAll(Arrays.asList(findings));
             m.put("file name", filename);
             m.put("label", label);
+            m.put("findings", js_findings);
             file_entries.add(m);
         }
 
@@ -142,7 +155,7 @@ public class Database {
     }
 
     protected void load_from_json(File savefile){
-        // preliminary: clear previous files and labels
+        // preliminary: clear labeled files and labels
         this.clear_labels();
         this.clear_previous_files();
 
@@ -169,8 +182,9 @@ public class Database {
                 Map m = (Map) file_entries.get(i);
                 String filename = (String) m.get("file name");
                 int label = (int) (long) m.get("label");
+                String[] findings = (String[]) m.get("findings");
                 File file = new File(img_dir + '/' + filename);
-                this.add_label_entry(file, (int)label);
+                this.add_label_entry(file, label, findings);
             }
 
         }
@@ -187,7 +201,7 @@ public class Database {
         File test = new File("C:/Users/Amar/Git/xray-labeler/test.json");
         Database data = new Database();
         data.load_from_json(test);
-        for (File file: data.previous){
+        for (File file: data.labeled){
             System.out.println(file.getPath());
         }
     }
