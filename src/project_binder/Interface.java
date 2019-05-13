@@ -394,7 +394,7 @@ public class Interface extends JFrame{
     private String[] get_findings(){
         ArrayList<String> findings = new ArrayList<>();
         for(JCheckBox box : this.labels_box){
-            if(box.isEnabled()){
+            if(box.isSelected()){
                 findings.add(box.getText());
             }
         }
