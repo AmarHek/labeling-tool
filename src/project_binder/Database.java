@@ -99,6 +99,15 @@ public class Database {
         return this.findings.get(file.getName());
     }
 
+    protected boolean is_finished(){
+        if (image_files.size() == 0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     protected void save_to_json(File save_file){
 
         JSONObject savefile = new JSONObject();

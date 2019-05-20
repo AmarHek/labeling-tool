@@ -1,5 +1,7 @@
 package project_binder;
 
+import jdk.nashorn.internal.scripts.JO;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -346,19 +348,25 @@ public class Interface extends JFrame{
         else {
             this.data.resetCounter();
             resetCheckboxes();
-            try {
-                BufferedImage bimg_old = ImageIO.read(image_buffer);
+            //try {
+                //BufferedImage bimg_old = ImageIO.read(image_buffer);
+            if (data.is_finished()){
+                JOptionPane.showMessageDialog(panel, "No more images left.",
+                        "Finished", JOptionPane.INFORMATION_MESSAGE);
+            }
+            else {
                 image_buffer = this.data.get_random_file();
-                BufferedImage bimg_new = ImageIO.read(image_buffer);
+                //BufferedImage bimg_new = ImageIO.read(image_buffer);
                 latest_image = image_buffer;
                 this.setImage(image_buffer);
-                if (bimg_old.getWidth() != bimg_new.getWidth() || bimg_old.getHeight() != bimg_new.getHeight()) {
-                    this.setVisible(false);
-                    this.setVisible(true);
-                }
-            }
-            catch (IOException ex) {
-                System.out.println(ex.getMessage());
+                //if (bimg_old.getWidth() != bimg_new.getWidth() || bimg_old.getHeight() != bimg_new.getHeight()) {
+                //    this.setVisible(false);
+                //    this.setVisible(true);
+                //}
+                //}
+                //catch (IOException ex) {
+                //    System.out.println(ex.getMessage());
+                //}
             }
         }
     }
