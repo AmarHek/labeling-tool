@@ -1,15 +1,10 @@
 package project_binder;
 
-import jdk.nashorn.internal.scripts.JO;
-
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -100,7 +95,7 @@ public class Interface extends JFrame{
         saveMenuItem.setMnemonic(KeyEvent.VK_S);
         saveMenuItem.setEnabled(false);
         saveMenuItem.setToolTipText("Save data to current file");
-        loadMenuItem.addActionListener((event) -> open());
+        loadMenuItem.addActionListener((event) -> load());
         loadMenuItem.setMnemonic(KeyEvent.VK_L);
         loadMenuItem.setToolTipText("Load data and database from a saved file");
         clearMenuItem.addActionListener((event) -> clear_progress());
@@ -148,7 +143,7 @@ public class Interface extends JFrame{
         finding = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String[] findings = get_findings();
+                ArrayList<String> findings = get_findings();
                 if(check_empty(findings)) {
                     addLabel(1, findings);
                 }
@@ -296,7 +291,7 @@ public class Interface extends JFrame{
             this.image_label.setIcon(new ImageIcon(image.getPath()));
             this.setStatus(image);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "File not found");
+            JOptionPane.showMessageDialog(panel, "File not found");
             System.out.println(e);
         }
     }
@@ -399,21 +394,21 @@ public class Interface extends JFrame{
     }
 
     // Functions for handling data: creating database, setting labels, saving and loading files, clearing progress
-    private String[] get_findings(){
+    private ArrayList<String> get_findings(){
         ArrayList<String> findings = new ArrayList<>();
         for(JCheckBox box : this.labels_box){
             if(box.isSelected()){
                 findings.add(box.getText());
             }
         }
-        return findings.toArray(new String[findings.size()]);
+        return findings;
     }
 
-    private boolean check_empty(String[] findings){
-        if(findings.length == 0){
-            JOptionPane.showMessageDialog(null,
-                    "You must check at least one finding before pressing 'Finding'!",
-                    "No Finding", JOptionPane.WARNING_MESSAGE);
+    private boolean check_empty(ArrayList<String> findings){
+        if(findings.size() == 0){
+            JOptionPane.showMessageDialog(panel,
+                    "You must check at least one finding before pressing 'Finding'.",
+                    "No Findings", JOptionPane.WARNING_MESSAGE);
             return false;
         }
         else{
@@ -421,9 +416,9 @@ public class Interface extends JFrame{
         }
     }
 
-    private void addLabel(int label, String[] findings){
+    private void addLabel(int label, ArrayList<String> findings){
         if(image_buffer.getPath().equals(placeholder)){
-            JOptionPane.showMessageDialog(null, "No suitable image selected yet.",
+            JOptionPane.showMessageDialog(panel, "No suitable image selected yet.",
                     "No Image", JOptionPane.WARNING_MESSAGE);
         }
         else{
@@ -452,7 +447,7 @@ public class Interface extends JFrame{
     private void save_as(boolean showDialog){
         int option;
         if(showDialog){
-            option = JOptionPane.showConfirmDialog(null,
+            option = JOptionPane.showConfirmDialog(panel,
                     "Choose a location for your save file.",
                     "Save Dialog", JOptionPane.OK_CANCEL_OPTION);
         }
@@ -513,17 +508,17 @@ public class Interface extends JFrame{
             int dialogResult = JOptionPane.showConfirmDialog(panel, "Clear all progress?",
                     null, JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
-                this.data.clear_previous_files();
+                this.data.clear_labeled();
                 this.data.clear_labels();
                 this.display_random();
             }
         }
     }
 
-    private void open(){
+    private void load(){
         String default_directory;
         if(this.save_file != null){
-            default_directory = this.data.img_dir.getAbsolutePath();
+            default_directory = this.save_file.getAbsolutePath();
         }
         else{
             default_directory = "./";
@@ -547,7 +542,12 @@ public class Interface extends JFrame{
                 int result = JOptionPane.showConfirmDialog(panel,
                         "Do you want to save your progress before exiting?");
                 if (result == JOptionPane.YES_OPTION) {
-                    save_as(false);
+                    if(saveMenuItem.isEnabled()){
+                        save();
+                    }
+                    else {
+                        save_as(false);
+                    }
                     System.exit(0);
                 } else if (result == JOptionPane.NO_OPTION) {
                     System.exit(0);

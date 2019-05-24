@@ -18,14 +18,14 @@ public class Database {
     protected ArrayList<File> image_files;
     protected Map<String, Integer> labels;
     protected ArrayList<File> labeled;
-    protected Map<String, String[]> findings;
+    protected Map<String, ArrayList<String>> findings;
     private int labeled_counter;
 
     // static Scanner scanner = new Scanner(System.in);
 
     public Database(File img_dir){
         this.img_dir = img_dir;
-        image_files = new ArrayList<>();
+        this.image_files = new ArrayList<>();
         File[] files = img_dir.listFiles();
         Collections.addAll(image_files, files);
         this.labels = new HashMap<>();
@@ -37,21 +37,18 @@ public class Database {
     public Database(){
         this.labels = new HashMap<>();
         this.labeled = new ArrayList<>();
+        this.findings = new HashMap<>();
         this.labeled_counter = 0;
+        this.image_files = new ArrayList<>();
     }
 
     protected void set_images(File img_dir){
         this.img_dir = img_dir;
-        this.reset_images();
-    }
-
-    protected void reset_images() {
-        image_files.clear();
         File[] files = img_dir.listFiles();
         Collections.addAll(image_files, files);
     }
 
-    protected void add_label_entry(File file, int label, String[] findings){
+    protected void add_label_entry(File file, int label, ArrayList<String> findings){
         String file_name = file.getName();
         this.labels.put(file_name, label);
         this.findings.put(file_name, findings);
@@ -85,7 +82,7 @@ public class Database {
         findings.clear();
     }
 
-    protected void clear_previous_files(){
+    protected void clear_labeled(){
         this.labeled.clear();
     }
 
@@ -95,7 +92,7 @@ public class Database {
         return this.image_files.get(randomIndex);
     }
 
-    protected String[] get_findings(File file){
+    protected ArrayList<String> get_findings(File file){
         return this.findings.get(file.getName());
     }
 
@@ -129,15 +126,13 @@ public class Database {
 
         JSONArray file_entries = new JSONArray();
 
-
-        // TODO: check if findings are added correctly
         for(File file: labeled){
             Map m = new LinkedHashMap(2);
             String filename = file.getName();
             int label = labels.get(filename);
-            String[] findings = this.findings.get(filename);
+            ArrayList<String> findings = this.findings.get(filename);
             JSONArray js_findings = new JSONArray();
-            js_findings.addAll(Arrays.asList(findings));
+            js_findings.addAll(findings);
             m.put("file name", filename);
             m.put("label", label);
             m.put("findings", js_findings);
@@ -164,10 +159,6 @@ public class Database {
     }
 
     protected void load_from_json(File savefile){
-        // preliminary: clear labeled files and labels
-        this.clear_labels();
-        this.clear_previous_files();
-
         try {
             // load the file
             Object obj = new JSONParser().parse(new FileReader(savefile.getAbsolutePath()));
@@ -191,7 +182,8 @@ public class Database {
                 Map m = (Map) file_entries.get(i);
                 String filename = (String) m.get("file name");
                 int label = (int) (long) m.get("label");
-                String[] findings = (String[]) m.get("findings");
+                obj = m.get("findings");
+                String[] findings = new Array
                 File file = new File(img_dir + '/' + filename);
                 this.add_label_entry(file, label, findings);
             }
