@@ -1,0 +1,9 @@
+# IntelliJ
+.idea
+
+# Output
+out
+.jar
+
+# Test Files
+.json
