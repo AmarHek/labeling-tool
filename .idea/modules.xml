@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/xray-labeler.iml" filepath="$PROJECT_DIR$/xray-labeler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/labeling-tool.iml" filepath="$PROJECT_DIR$/labeling-tool.iml" />
     </modules>
   </component>
 </project>

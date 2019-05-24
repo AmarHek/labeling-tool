@@ -234,7 +234,7 @@ public class Interface extends JFrame{
             this.image_label.setIcon(new ImageIcon(image.getPath()));
             this.setStatus(image);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "File not found");
+            JOptionPane.showMessageDialog(panel, "File not found");
             System.out.println(e);
         }
     }
@@ -299,7 +299,7 @@ public class Interface extends JFrame{
 
     private void addLabel(int label){
         if(image_buffer.getPath().equals(placeholder)){
-            JOptionPane.showMessageDialog(null, "No suitable image selected yet.",
+            JOptionPane.showMessageDialog(panel, "No suitable image selected yet.",
                     "No Image", JOptionPane.WARNING_MESSAGE);
         }
         else{
@@ -328,7 +328,7 @@ public class Interface extends JFrame{
     private void save_as(boolean showDialog){
         int option;
         if(showDialog){
-            option = JOptionPane.showConfirmDialog(null,
+            option = JOptionPane.showConfirmDialog(panel,
                     "Choose a location for your save file.",
                     "Save Dialog", JOptionPane.OK_CANCEL_OPTION);
         }
@@ -376,6 +376,7 @@ public class Interface extends JFrame{
         }
         if (this.data != null) {
             this.save_as(true);
+            this.display_random();
         }
     }
 
