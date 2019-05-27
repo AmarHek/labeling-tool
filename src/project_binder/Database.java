@@ -97,12 +97,7 @@ public class Database {
     }
 
     protected boolean is_finished(){
-        if (image_files.size() == 0){
-            return true;
-        }
-        else{
-            return false;
-        }
+        return image_files.size() == 0;
     }
 
     protected void save_to_json(File save_file){
