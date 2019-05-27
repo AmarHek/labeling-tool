@@ -152,8 +152,7 @@ public class Interface extends JFrame{
         nofinding = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String[] findings = {};
-                addLabel(0, findings);
+                addLabel(0, new ArrayList<String>());
             }
         };
         //binary = new AbstractAction() {
@@ -316,9 +315,9 @@ public class Interface extends JFrame{
     }
 
     private void setCheckboxes(File image) {
-        String[] findings = this.data.get_findings(image);
+        ArrayList<String> findings = this.data.get_findings(image);
         for (JCheckBox box : this.labels_box) {
-            if(Arrays.asList(findings).contains(box.getText())) {
+            if(findings.contains(box.getText())) {
                 box.setSelected(true);
             }
             else {

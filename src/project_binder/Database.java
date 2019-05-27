@@ -178,7 +178,7 @@ public class Database {
                 String filename = (String) m.get("file name");
                 int label = (int) (long) m.get("label");
                 obj = m.get("findings");
-                String[] findings = new Array
+                ArrayList<String> findings = (ArrayList<String>) obj;
                 File file = new File(img_dir + '/' + filename);
                 this.add_label_entry(file, label, findings);
             }
