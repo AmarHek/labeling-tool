@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 
 import java.io.IOException;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import org.json.simple.JSONObject;
@@ -20,9 +19,8 @@ public class Database {
     protected Map<String, Integer> labels;
     protected ArrayList<File> labeled;
     protected Map<String, ArrayList<String>> findings;
+    protected Labels labels_template;
     private int labeled_counter;
-
-    // static Scanner scanner = new Scanner(System.in);
 
     public Database(File img_dir){
         this.img_dir = img_dir;
@@ -33,6 +31,7 @@ public class Database {
         this.findings = new HashMap<>();
         this.labeled = new ArrayList<>();
         this.labeled_counter = 0;
+        this.labels_template = new Labels();
     }
 
     public Database(){
@@ -41,15 +40,22 @@ public class Database {
         this.findings = new HashMap<>();
         this.labeled_counter = 0;
         this.image_files = new ArrayList<>();
+        this.labels_template = new Labels();
     }
 
-    protected void set_images(File img_dir){
+    public void set_images(File img_dir){
         this.img_dir = img_dir;
         File[] files = img_dir.listFiles();
         Collections.addAll(image_files, files);
     }
 
-    protected void add_label_entry(File file, int label, ArrayList<String> findings){
+    public void reset_images(){
+        this.image_files.clear();
+        File[] files = img_dir.listFiles();
+        Collections.addAll(image_files, files);
+    }
+
+    public void add_label_entry(File file, int label, ArrayList<String> findings){
         String file_name = file.getName();
         this.labels.put(file_name, label);
         this.findings.put(file_name, findings);
@@ -59,51 +65,70 @@ public class Database {
         }
     }
 
-    protected int get_labeled_counter(){
+    public void reset(){
+        resetCounter();
+        clear_labels();
+        clear_labeled();
+        reset_images();
+    }
+
+    public int get_labeled_counter(){
         return labeled_counter;
     }
 
-    protected void resetCounter(){
+    public void resetCounter(){
         labeled_counter = 0;
     }
 
-    protected void incrementCounter(){
+    public void incrementCounter(){
         if(labeled_counter < labeled.size())
         labeled_counter++;
     }
 
-    protected void decrementCounter(){
+    public void decrementCounter(){
         if(labeled_counter > 0) {
             labeled_counter--;
         }
     }
 
-    protected void clear_labels(){
+    public void clear_labels(){
         labels.clear();
         findings.clear();
     }
 
-    protected void clear_labeled(){
+    public void clear_labeled(){
         this.labeled.clear();
     }
 
-    protected File get_random_file(){
+    public File get_random_file(){
         Random generator = new Random();
         int randomIndex = generator.nextInt(this.image_files.size());
         return this.image_files.get(randomIndex);
     }
 
-    protected ArrayList<String> get_findings(File file){
+    public ArrayList<String> get_findings(File file){
         return this.findings.get(file.getName());
     }
 
-    protected boolean is_finished(){
+    public boolean is_finished(){
         return image_files.size() == 0;
     }
 
-    protected void save_to_json(File save_file){
+    public void set_labels_template(File labelsFile){
+        this.labels_template = new Labels(labelsFile);
+    }
 
-        JSONObject savefile = new JSONObject();
+    public void create_label(String label){
+        this.labels_template.add_label(label);
+    }
+
+    public void remove_label(String label){
+        this.labels_template.remove_label(label);
+    }
+
+    public void save_to_json(File save_file){
+
+        JSONObject saveFile = new JSONObject();
 
         Map meta = new LinkedHashMap(5);
 
@@ -119,7 +144,7 @@ public class Database {
         meta.put("number of 'finding'", num_findings);
         meta.put("number of 'no finding'", labeled.size() - num_findings);
 
-        savefile.put("Metadata", meta);
+        saveFile.put("Metadata", meta);
 
         JSONArray file_entries = new JSONArray();
 
@@ -136,13 +161,13 @@ public class Database {
             file_entries.add(m);
         }
 
-        savefile.put("Files", file_entries);
+        saveFile.put("Files", file_entries);
 
         String path = save_file.getAbsolutePath();
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(path);
-            pw.write(savefile.toJSONString());
+            pw.write(saveFile.toJSONString());
         }
         catch (IOException e){
             System.err.println("Caught IOException" + e.getMessage());
@@ -155,7 +180,7 @@ public class Database {
         }
     }
 
-    protected void save_to_json(File save_file, ArrayList<String> labels_template){
+    public void save_to_json(File save_file, ArrayList<String> labels_template){
 
         JSONObject savefile = new JSONObject();
 
@@ -213,10 +238,10 @@ public class Database {
         }
     }
 
-    protected void load_from_json(File savefile){
+    public void load_from_json(File saveFile){
         try {
             // load the file
-            Object obj = new JSONParser().parse(new FileReader(savefile.getAbsolutePath()));
+            Object obj = new JSONParser().parse(new FileReader(saveFile.getAbsolutePath()));
 
             // typecast obj to JSONObject
             JSONObject loaded = (JSONObject) obj;

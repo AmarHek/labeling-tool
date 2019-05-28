@@ -30,6 +30,16 @@ public class Labels {
         return labels;
     }
 
+    public void add_label(String label){
+        if(!labels.contains(label.trim())){
+            labels.add(label);
+        }
+    }
+
+    public void remove_label(String label){
+
+    }
+
     private void extract_labels(){
         try{
             FileReader fileReader = new FileReader(source_file);

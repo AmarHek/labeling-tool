@@ -1,23 +1,24 @@
 package project_binder;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static javax.swing.LayoutStyle.ComponentPlacement.*;
 
 public class Interface extends JFrame{
 
     private Database data;
-    private Labels labels;
+    // private Labels labels;
+
     private JPanel panel;
 
-    private int mode = 1; // 0 = binary_item, 1 = multi_label_item
+    // 0 = binary, 1 = multi_label
+    private int mode = 1;
 
     private JLabel current_file;
     private JLabel current_label;
@@ -39,16 +40,11 @@ public class Interface extends JFrame{
     private Action next;
     private Action previous;
     private Action finding;
-    private Action nofinding;
-    //private Action binary;
-    //private Action multi_label;
+    private Action noFinding;
 
     private JMenuItem saveMenuItem;
-    private JRadioButtonMenuItem binary_item;
-    private JRadioButtonMenuItem multi_label_item;
 
     public Interface() {
-        labels = new Labels();
         initUI();
     }
 
@@ -58,7 +54,7 @@ public class Interface extends JFrame{
         setActions();
         createLayout();
 
-        this.setTitle("XRay-Labeler");
+        this.setTitle("Labeling Tool");
         //TODO: Variable size
         //setSize(1000, 800);
         this.setLocationRelativeTo(null);
@@ -72,53 +68,85 @@ public class Interface extends JFrame{
     // sets the menu bar and respective actions
     private void createMenuBar(){
         JMenuBar menubar = new JMenuBar();
+
         JMenu fileMenu = new JMenu("File");
-        //JMenu modeMenu = new JMenu("Mode");
 
         JMenuItem selectMenuItem = new JMenuItem("New File");
-        JMenuItem setdatabaseMenuItem = new JMenuItem("Set Database");
-        JMenuItem saveasMenuItem = new JMenuItem("Save as");
-        saveMenuItem = new JMenuItem("Save");
-        JMenuItem loadMenuItem = new JMenuItem("Load");
-        JMenuItem clearMenuItem = new JMenuItem("Clear");
-
-        //binary_item = new JRadioButtonMenuItem("Binary");
-        //multi_label_item = new JRadioButtonMenuItem("Multi-Label");
-
         selectMenuItem.addActionListener((event) -> new_file());
         selectMenuItem.setMnemonic(KeyEvent.VK_N);
         selectMenuItem.setToolTipText("Choose Directory and create new save file");
-        setdatabaseMenuItem.addActionListener((event) -> setDatabase());
-        selectMenuItem.setMnemonic(KeyEvent.VK_D);
-        selectMenuItem.setToolTipText("Set a new directory to load the images from");
-        saveasMenuItem.addActionListener((event) -> save_as(false));
-        saveasMenuItem.setMnemonic(KeyEvent.VK_A);
-        saveasMenuItem.setToolTipText("Save data to a new file");
+        fileMenu.add(selectMenuItem);
+
+        JMenuItem setDatabaseMenuItem = new JMenuItem("Set Database");
+        setDatabaseMenuItem.addActionListener((event) -> setDatabase());
+        setDatabaseMenuItem.setMnemonic(KeyEvent.VK_D);
+        setDatabaseMenuItem.setToolTipText("Set a new directory to load the images from");
+        fileMenu.add(setDatabaseMenuItem);
+
+        fileMenu.addSeparator();
+
+        JMenuItem saveAsMenuItem = new JMenuItem("Save as");
+        saveAsMenuItem.addActionListener((event) -> save_as(false));
+        saveAsMenuItem.setMnemonic(KeyEvent.VK_A);
+        saveAsMenuItem.setToolTipText("Save data to a new file");
+        fileMenu.add(saveAsMenuItem);
+
+        saveMenuItem = new JMenuItem("Save");
         saveMenuItem.addActionListener((event) -> save());
         saveMenuItem.setMnemonic(KeyEvent.VK_S);
         saveMenuItem.setEnabled(false);
         saveMenuItem.setToolTipText("Save data to current file");
+        fileMenu.add(saveMenuItem);
+
+        JMenuItem loadMenuItem = new JMenuItem("Load");
         loadMenuItem.addActionListener((event) -> load());
         loadMenuItem.setMnemonic(KeyEvent.VK_L);
         loadMenuItem.setToolTipText("Load data and database from a saved file");
+        fileMenu.add(loadMenuItem);
+
+        fileMenu.addSeparator();
+
+        JMenuItem clearMenuItem = new JMenuItem("Clear");
         clearMenuItem.addActionListener((event) -> clear_progress());
         clearMenuItem.setMnemonic(KeyEvent.VK_C);
         clearMenuItem.setToolTipText("Resets memory of already labeled images and clears all set labels");
-
-        fileMenu.add(selectMenuItem);
-        fileMenu.add(setdatabaseMenuItem);
-        fileMenu.addSeparator();
-        fileMenu.add(saveasMenuItem);
-        fileMenu.add(saveMenuItem);
-        fileMenu.add(loadMenuItem);
-        fileMenu.addSeparator();
         fileMenu.add(clearMenuItem);
 
-        //modeMenu.add(binary_item);
-        //modeMenu.add(multi_label_item);
-
         menubar.add(fileMenu);
-        //menubar.add(modeMenu);
+
+        JMenu editMenu = new JMenu("Edit");
+
+        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels from File");
+        labelsFromFileMenuItem.addActionListener((event) -> setLabelsFromFile());
+        labelsFromFileMenuItem.setToolTipText("Load custom labels from a specified file");
+        editMenu.add(labelsFromFileMenuItem);
+
+        JMenuItem createLabelMenuItem = new JMenuItem("Create Label");
+        createLabelMenuItem.addActionListener((event) -> createLabel());
+        createLabelMenuItem.setToolTipText("Create a new label");
+        editMenu.add(createLabelMenuItem);
+
+        JMenuItem removeLabelMenuItem = new JMenuItem("Remove Label");
+        removeLabelMenuItem.addActionListener((event) -> removeLabel());
+        removeLabelMenuItem.setToolTipText("Remove an existing label");
+        editMenu.add(removeLabelMenuItem);
+
+        menubar.add(editMenu);
+
+        JMenu modeMenu = new JMenu("Mode");
+        ButtonGroup modeGroup = new ButtonGroup();
+
+        JRadioButtonMenuItem binary_radio = new JRadioButtonMenuItem("Binary");
+        binary_radio.addActionListener((event) -> changeMode(0));
+        modeGroup.add(binary_radio);
+        modeMenu.add(binary_radio);
+
+        JRadioButtonMenuItem multi_label_radio = new JRadioButtonMenuItem("Multi-Label");
+        multi_label_radio.addActionListener((event) -> changeMode(1));
+        modeGroup.add(multi_label_radio);
+        modeMenu.add(multi_label_radio);
+
+        menubar.add(modeMenu);
 
         setJMenuBar(menubar);
     }
@@ -152,10 +180,10 @@ public class Interface extends JFrame{
                 }
             }
         };
-        nofinding = new AbstractAction() {
+        noFinding = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addLabel(0, new ArrayList<String>());
+                addLabel(0, new ArrayList<>());
             }
         };
         //binary = new AbstractAction() {
@@ -180,13 +208,9 @@ public class Interface extends JFrame{
         JButton nextBtn = new JButton("Next");
         JButton previousBtn = new JButton("Previous");
         JButton findingBtn = new JButton("Finding");
-        JButton nofindingBtn = new JButton("No Finding");
+        JButton noFindingBtn = new JButton("No Finding");
 
-        labels_box = new JCheckBox[labels.labels.size()];
-
-        for(int i = 0; i<labels.labels.size(); i++){
-            labels_box[i] = new JCheckBox(labels.labels.get(i));
-        }
+        setCheckboxes();
 
         placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
@@ -223,7 +247,7 @@ public class Interface extends JFrame{
                                     .addComponent(previousBtn)
                                     .addComponent(nextBtn)
                                     .addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(nofindingBtn)
+                                    .addComponent(noFindingBtn)
                                     .addComponent(findingBtn))
                         .addComponent(image_label)
                         .addGroup(gl.createSequentialGroup()
@@ -242,7 +266,7 @@ public class Interface extends JFrame{
                                 .addComponent(randomBtn)
                                 .addComponent(nextBtn)
                                 .addComponent(previousBtn)
-                                .addComponent(nofindingBtn)
+                                .addComponent(noFindingBtn)
                                 .addComponent(findingBtn))
                         .addComponent(image_label)
                         .addGroup(gl.createParallelGroup()
@@ -252,7 +276,7 @@ public class Interface extends JFrame{
                     .addGroup(sGroup)
         );
 
-        gl.linkSize(randomBtn, nextBtn, previousBtn, findingBtn, nofindingBtn);
+        gl.linkSize(randomBtn, nextBtn, previousBtn, findingBtn, noFindingBtn);
         gl.linkSize(current_file, current_label, num_labeled);
 
         pack();
@@ -270,9 +294,9 @@ public class Interface extends JFrame{
         findingBtn.addActionListener(finding);
         findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "finding");
         findingBtn.getActionMap().put("finding", finding);
-        nofindingBtn.addActionListener(nofinding);
-        nofindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "nofinding");
-        nofindingBtn.getActionMap().put("nofinding", nofinding);
+        noFindingBtn.addActionListener(noFinding);
+        noFindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "noFinding");
+        noFindingBtn.getActionMap().put("noFinding", noFinding);
 
 
         randomBtn.setToolTipText("Displays a random image");
@@ -280,7 +304,7 @@ public class Interface extends JFrame{
         previousBtn.setToolTipText("Displays labeled image (or random if none labeled)");
         findingBtn.setToolTipText("Mark image as 'finding detected' " +
                 "and add all checked findings (at least one required)");
-        nofindingBtn.setToolTipText("Mark image as 'no finding detected'");
+        noFindingBtn.setToolTipText("Mark image as 'no finding detected'");
     }
 
 
@@ -525,14 +549,63 @@ public class Interface extends JFrame{
         JFileChooser chooser = new JFileChooser(default_directory);
         int option = chooser.showOpenDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
-            File savefile = chooser.getSelectedFile();
+            File saveFile = chooser.getSelectedFile();
             this.data = new Database();
-            this.data.load_from_json(savefile);
-            this.save_file = savefile;
+            this.data.load_from_json(saveFile);
+            this.save_file = saveFile;
             display_random();
         }
     }
 
+    private void setLabelsFromFile(){
+        // specify a file to load the labels from
+        JFileChooser chooser = new JFileChooser("./");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        chooser.setFileFilter(filter);
+        int option = chooser.showOpenDialog(panel);
+        if(option == JFileChooser.APPROVE_OPTION){
+            File labelsFile = chooser.getSelectedFile();
+            this.data.set_labels_template(labelsFile);
+            this.setCheckboxes();
+        }
+    }
+
+    private void createLabel(){
+        String label = JOptionPane.showInputDialog(panel, "Enter the new label");
+        this.data.create_label(label);
+        this.setCheckboxes();
+    }
+
+    private void removeLabel(){
+        int option = JOptionPane.showConfirmDialog(panel, "Removing a label will reset the current progress. " +
+                "Do you want to save your progress?");
+        if(option == JOptionPane.OK_OPTION){
+            if(save_file != null){
+                this.save();
+            }
+            else{
+                this.save_as(false);
+            }
+        }
+
+        String label = JOptionPane.showInputDialog(panel, "Enter the label you want to delete");
+        this.data.remove_label(label);
+        this.setCheckboxes();
+        this.data.reset();
+    }
+
+    private void setCheckboxes(){
+        labels_box = new JCheckBox[data.labels_template.labels.size()];
+
+        for(int i = 0; i<data.labels_template.labels.size(); i++){
+            labels_box[i] = new JCheckBox(data.labels_template.labels.get(i));
+        }
+    }
+
+    private void changeMode(int mode){
+        this.mode = mode;
+        // TODO
+    }
 
     private WindowListener exit(){
         return new WindowAdapter() {
@@ -557,7 +630,6 @@ public class Interface extends JFrame{
 
 
 
-    //Main method
 
     public static void main(String[] args){
         java.util.Locale.setDefault(java.util.Locale.ENGLISH);
