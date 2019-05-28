@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 
 import java.io.IOException;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 import org.json.simple.JSONObject;
@@ -104,10 +105,69 @@ public class Database {
 
         JSONObject savefile = new JSONObject();
 
-        Map meta = new LinkedHashMap(4);
+        Map meta = new LinkedHashMap(5);
 
         meta.put("image directory", this.img_dir.getAbsolutePath());
         meta.put("number of checked files", labeled.size());
+        meta.put("mode", 0);
+
+        int num_findings = 0;
+        for(File file: labeled){
+            num_findings += labels.get(file.getName());
+        }
+
+        meta.put("number of 'finding'", num_findings);
+        meta.put("number of 'no finding'", labeled.size() - num_findings);
+
+        savefile.put("Metadata", meta);
+
+        JSONArray file_entries = new JSONArray();
+
+        for(File file: labeled){
+            Map m = new LinkedHashMap(2);
+            String filename = file.getName();
+            int label = labels.get(filename);
+            ArrayList<String> findings = this.findings.get(filename);
+            JSONArray js_findings = new JSONArray();
+            js_findings.addAll(findings);
+            m.put("file name", filename);
+            m.put("label", label);
+            m.put("findings", js_findings);
+            file_entries.add(m);
+        }
+
+        savefile.put("Files", file_entries);
+
+        String path = save_file.getAbsolutePath();
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(path);
+            pw.write(savefile.toJSONString());
+        }
+        catch (IOException e){
+            System.err.println("Caught IOException" + e.getMessage());
+        }
+        finally {
+            if(pw != null){
+                pw.flush();
+                pw.close();
+            }
+        }
+    }
+
+    protected void save_to_json(File save_file, ArrayList<String> labels_template){
+
+        JSONObject savefile = new JSONObject();
+
+        Map meta = new LinkedHashMap(6);
+
+        meta.put("image directory", this.img_dir.getAbsolutePath());
+        meta.put("number of checked files", labeled.size());
+        meta.put("mode", 1);
+
+        JSONArray js_labels = new JSONArray();
+        js_labels.addAll(labels_template);
+        meta.put("possible labels", js_labels);
 
         int num_findings = 0;
         for(File file: labeled){
@@ -164,6 +224,13 @@ public class Database {
             // extract image directory
             Map meta = ((Map) loaded.get("Metadata"));
             String img_dir = (String) meta.get("image directory");
+            int mode = (int) (long) meta.get("mode");
+
+            // if mode is multi-label, extract the labels template
+            if(mode == 1){
+                obj = meta.get("possible labels");
+                ArrayList<String> labels_template = (ArrayList<String>) obj;
+            }
 
             // Set image directory and load file(name)s
             this.set_images(new File(img_dir));

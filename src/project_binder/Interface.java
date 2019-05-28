@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -13,7 +14,16 @@ import static javax.swing.LayoutStyle.ComponentPlacement.*;
 public class Interface extends JFrame{
 
     private Database data;
+    private Labels labels;
     private JPanel panel;
+
+    private int mode = 1; // 0 = binary_item, 1 = multi_label_item
+
+    private JLabel current_file;
+    private JLabel current_label;
+    private JLabel num_labeled;
+
+    private String placeholder;
 
     // image variables
     private JLabel image_label;
@@ -34,18 +44,11 @@ public class Interface extends JFrame{
     //private Action multi_label;
 
     private JMenuItem saveMenuItem;
-    //private JRadioButtonMenuItem binary_item;
-    //private JRadioButtonMenuItem multi_label_item;
-
-    //private int mode = 1; // 0 = binary_item, 1 = multi_label_item
-
-    private JLabel current_file;
-    private JLabel current_label;
-    private JLabel num_labeled;
-
-    private String placeholder;
+    private JRadioButtonMenuItem binary_item;
+    private JRadioButtonMenuItem multi_label_item;
 
     public Interface() {
+        labels = new Labels();
         initUI();
     }
 
@@ -179,13 +182,10 @@ public class Interface extends JFrame{
         JButton findingBtn = new JButton("Finding");
         JButton nofindingBtn = new JButton("No Finding");
 
-        String[] labels = {"Cardiomegaly", "Emphysema", "Effusion", "Hernia", "Infiltration", "Mass", "Nodule",
-        "Atelectasis", "Pleural_Thickening", "Pneumothorax", "Pneumonia", "Fibrosis", "Edema", "Consolidation"};
+        labels_box = new JCheckBox[labels.labels.size()];
 
-        labels_box = new JCheckBox[labels.length];
-
-        for(int i=0; i<14; i++){
-            labels_box[i] = new JCheckBox(labels[i]);
+        for(int i = 0; i<labels.labels.size(); i++){
+            labels_box[i] = new JCheckBox(labels.labels.get(i));
         }
 
         placeholder = "src/resources/Platzhalter.png";
