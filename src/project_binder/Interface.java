@@ -18,7 +18,7 @@ public class Interface extends JFrame{
     private JPanel panel;
 
     // 0 = binary, 1 = multi_label
-    private int mode = 1;
+    private boolean mode = true;
 
     private JLabel current_file;
     private JLabel current_label;
@@ -45,6 +45,7 @@ public class Interface extends JFrame{
     private JMenuItem saveMenuItem;
 
     public Interface() {
+        data = new Database();
         initUI();
     }
 
@@ -137,12 +138,12 @@ public class Interface extends JFrame{
         ButtonGroup modeGroup = new ButtonGroup();
 
         JRadioButtonMenuItem binary_radio = new JRadioButtonMenuItem("Binary");
-        binary_radio.addActionListener((event) -> changeMode(0));
+        binary_radio.addActionListener((event) -> changeMode(false));
         modeGroup.add(binary_radio);
         modeMenu.add(binary_radio);
 
         JRadioButtonMenuItem multi_label_radio = new JRadioButtonMenuItem("Multi-Label");
-        multi_label_radio.addActionListener((event) -> changeMode(1));
+        multi_label_radio.addActionListener((event) -> changeMode(true));
         modeGroup.add(multi_label_radio);
         modeMenu.add(multi_label_radio);
 
@@ -492,7 +493,7 @@ public class Interface extends JFrame{
 
     private void setDatabase(){
         int option;
-        if (this.data != null){
+        if (this.data.img_dir != null){
             option = JOptionPane.showConfirmDialog(panel,
                     "Database already exists. Do you still want to change it?",
                         "Confirm Dialog", JOptionPane.OK_CANCEL_OPTION);
@@ -514,10 +515,10 @@ public class Interface extends JFrame{
     }
 
     private void new_file(){
-        if (this.data == null) {
+        if (this.data.img_dir == null) {
             this.setDatabase();
         }
-        if (this.data != null) {
+        if (this.data.img_dir != null) {
             this.save_as(true);
         }
     }
@@ -602,9 +603,12 @@ public class Interface extends JFrame{
         }
     }
 
-    private void changeMode(int mode){
+    private void changeMode(boolean mode){
         this.mode = mode;
-        // TODO
+        for (JCheckBox box : labels_box) {
+            box.setEnabled(mode);
+            box.setVisible(mode);
+        }
     }
 
     private WindowListener exit(){

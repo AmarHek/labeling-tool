@@ -37,7 +37,9 @@ public class Labels {
     }
 
     public void remove_label(String label){
-
+        if(labels.contains(label.trim())){
+            labels.remove(label);
+        }
     }
 
     private void extract_labels(){
