@@ -13,12 +13,8 @@ import static javax.swing.LayoutStyle.ComponentPlacement.*;
 public class Interface extends JFrame{
 
     private Database data;
-    // private Labels labels;
 
     private JPanel panel;
-
-    // 0 = binary, 1 = multi_label
-    private int mode = 1;
 
     private JLabel current_file;
     private JLabel current_label;
@@ -44,7 +40,12 @@ public class Interface extends JFrame{
 
     private JMenuItem saveMenuItem;
 
+    private GroupLayout gl;
+    private GroupLayout.ParallelGroup pGroup;
+    private GroupLayout.SequentialGroup sGroup;
+
     public Interface() {
+        data = new Database();
         initUI();
     }
 
@@ -131,23 +132,6 @@ public class Interface extends JFrame{
         removeLabelMenuItem.setToolTipText("Remove an existing label");
         editMenu.add(removeLabelMenuItem);
 
-        menubar.add(editMenu);
-
-        JMenu modeMenu = new JMenu("Mode");
-        ButtonGroup modeGroup = new ButtonGroup();
-
-        JRadioButtonMenuItem binary_radio = new JRadioButtonMenuItem("Binary");
-        binary_radio.addActionListener((event) -> changeMode(0));
-        modeGroup.add(binary_radio);
-        modeMenu.add(binary_radio);
-
-        JRadioButtonMenuItem multi_label_radio = new JRadioButtonMenuItem("Multi-Label");
-        multi_label_radio.addActionListener((event) -> changeMode(1));
-        modeGroup.add(multi_label_radio);
-        modeMenu.add(multi_label_radio);
-
-        menubar.add(modeMenu);
-
         setJMenuBar(menubar);
     }
 
@@ -175,9 +159,7 @@ public class Interface extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 ArrayList<String> findings = get_findings();
-                if(check_empty(findings)) {
-                    addLabel(1, findings);
-                }
+                addLabel(1, findings);
             }
         };
         noFinding = new AbstractAction() {
@@ -186,18 +168,6 @@ public class Interface extends JFrame{
                 addLabel(0, new ArrayList<>());
             }
         };
-        //binary = new AbstractAction() {
-        //    @Override
-        //    public void actionPerformed(ActionEvent e) {
-        //        mode = 0;
-        //    }
-        //};
-        //multi_label = new AbstractAction() {
-        //    @Override
-        //    public void actionPerformed(ActionEvent e) {
-        //        mode = 1;
-        //    }
-        //};
     }
 
     // creates button layout and sets image placeholder
@@ -221,8 +191,9 @@ public class Interface extends JFrame{
         num_labeled = new JLabel("Labeled Files: 0");
 
         Container pane = getContentPane();
-        GroupLayout gl = new GroupLayout(pane);
-        pane.setLayout(gl);
+        pane.add(panel);
+        gl = new GroupLayout(panel);
+        panel.setLayout(gl);
 
         gl.setAutoCreateContainerGaps(true);
         gl.setAutoCreateGaps(true);
@@ -231,8 +202,8 @@ public class Interface extends JFrame{
 
         // Creating the Layout
 
-        GroupLayout.ParallelGroup pGroup = gl.createParallelGroup();
-        GroupLayout.SequentialGroup sGroup = gl.createSequentialGroup();
+        pGroup = gl.createParallelGroup();
+        sGroup = gl.createSequentialGroup();
 
         for(JCheckBox box : labels_box){
             pGroup.addComponent(box);
@@ -427,18 +398,6 @@ public class Interface extends JFrame{
         return findings;
     }
 
-    private boolean check_empty(ArrayList<String> findings){
-        if(findings.size() == 0){
-            JOptionPane.showMessageDialog(panel,
-                    "You must check at least one finding before pressing 'Finding'.",
-                    "No Findings", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        else{
-            return true;
-        }
-    }
-
     private void addLabel(int label, ArrayList<String> findings){
         if(image_buffer.getPath().equals(placeholder)){
             JOptionPane.showMessageDialog(panel, "No suitable image selected yet.",
@@ -492,7 +451,7 @@ public class Interface extends JFrame{
 
     private void setDatabase(){
         int option;
-        if (this.data != null){
+        if (this.data.img_dir != null){
             option = JOptionPane.showConfirmDialog(panel,
                     "Database already exists. Do you still want to change it?",
                         "Confirm Dialog", JOptionPane.OK_CANCEL_OPTION);
@@ -514,10 +473,10 @@ public class Interface extends JFrame{
     }
 
     private void new_file(){
-        if (this.data == null) {
+        if (this.data.img_dir == null) {
             this.setDatabase();
         }
-        if (this.data != null) {
+        if (this.data.img_dir != null) {
             this.save_as(true);
         }
     }
@@ -572,8 +531,10 @@ public class Interface extends JFrame{
 
     private void createLabel(){
         String label = JOptionPane.showInputDialog(panel, "Enter the new label");
-        this.data.create_label(label);
-        this.setCheckboxes();
+        if(label != null){
+            this.data.create_label(label);
+            this.setCheckboxes();
+        }
     }
 
     private void removeLabel(){
@@ -588,11 +549,21 @@ public class Interface extends JFrame{
             }
         }
 
-        String label = JOptionPane.showInputDialog(panel, "Enter the label you want to delete");
-        this.data.remove_label(label);
-        this.setCheckboxes();
-        this.data.reset();
+        if(option == JOptionPane.OK_OPTION || option == JOptionPane.NO_OPTION) {
+            String label = JOptionPane.showInputDialog(panel, "Enter the label you want to delete");
+            if(label != null) {
+                this.data.remove_label(label);
+                //this.removeCheckbox(label);
+                this.data.reset();
+            }
+        }
     }
+
+    //private void removeCheckbox(String label){
+    //    gl.get
+    //    this.revalidate();
+    //    this.repaint();
+    //}
 
     private void setCheckboxes(){
         labels_box = new JCheckBox[data.labels_template.labels.size()];
@@ -600,11 +571,6 @@ public class Interface extends JFrame{
         for(int i = 0; i<data.labels_template.labels.size(); i++){
             labels_box[i] = new JCheckBox(data.labels_template.labels.get(i));
         }
-    }
-
-    private void changeMode(int mode){
-        this.mode = mode;
-        // TODO
     }
 
     private WindowListener exit(){
@@ -627,7 +593,6 @@ public class Interface extends JFrame{
             }
         };
     }
-
 
 
 

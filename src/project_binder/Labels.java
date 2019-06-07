@@ -30,6 +30,10 @@ public class Labels {
         return labels;
     }
 
+    public void set_labels(ArrayList<String> labels){
+        this.labels = labels;
+    }
+
     public void add_label(String label){
         if(!labels.contains(label.trim())){
             labels.add(label);
@@ -37,7 +41,9 @@ public class Labels {
     }
 
     public void remove_label(String label){
-        // TODO
+        if(labels.contains(label.trim())){
+            labels.remove(label);
+        }
     }
 
     private void extract_labels(){
