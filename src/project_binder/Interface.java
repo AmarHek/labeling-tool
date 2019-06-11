@@ -132,6 +132,8 @@ public class Interface extends JFrame{
         removeLabelMenuItem.setToolTipText("Remove an existing label");
         editMenu.add(removeLabelMenuItem);
 
+        menubar.add(editMenu);
+
         setJMenuBar(menubar);
     }
 
@@ -532,9 +534,20 @@ public class Interface extends JFrame{
     private void createLabel(){
         String label = JOptionPane.showInputDialog(panel, "Enter the new label");
         if(label != null){
-            this.data.create_label(label);
-            this.setCheckboxes();
+            label = label.trim();
+            if(!data.labels_template.labels.contains(label.trim())){
+                this.data.labels_template.add_label(label);
+                this.addCheckbox(label);
+            }
         }
+    }
+
+    private void addCheckbox(String label){
+        JCheckBox newLabel = new JCheckBox(label);
+        pGroup.addComponent(newLabel);
+        sGroup.addComponent(newLabel);
+        panel.revalidate();
+        panel.repaint();
     }
 
     private void removeLabel(){

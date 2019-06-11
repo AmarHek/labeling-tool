@@ -35,9 +35,7 @@ public class Labels {
     }
 
     public void add_label(String label){
-        if(!labels.contains(label.trim())){
             labels.add(label);
-        }
     }
 
     public void remove_label(String label){

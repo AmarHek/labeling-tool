@@ -120,10 +120,6 @@ public class Database {
         this.labels_template = new Labels(labelsFile);
     }
 
-    public void create_label(String label){
-        this.labels_template.add_label(label);
-    }
-
     public void remove_label(String label){
         this.labels_template.remove_label(label);
     }
