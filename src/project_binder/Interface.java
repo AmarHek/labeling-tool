@@ -12,7 +12,7 @@ import static javax.swing.LayoutStyle.ComponentPlacement.*;
 
 public class Interface extends JFrame{
 
-    private Database data;
+    private Database data = new Database();
 
     private JPanel panel;
 
@@ -27,16 +27,17 @@ public class Interface extends JFrame{
     private File image_buffer;
     private File latest_image;
 
-    private JCheckBox[] labels_box;
+    private ArrayList<JCheckBox> labels_box = new ArrayList<>();
 
     private File save_file;
 
-    // actions
-    private Action random;
     private Action next;
     private Action previous;
     private Action finding;
     private Action noFinding;
+
+    private JRadioButtonMenuItem ordered;
+    private JRadioButtonMenuItem random;
 
     private JMenuItem saveMenuItem;
 
@@ -45,7 +46,6 @@ public class Interface extends JFrame{
     private GroupLayout.SequentialGroup sGroup;
 
     public Interface() {
-        data = new Database();
         initUI();
     }
 
@@ -65,86 +65,104 @@ public class Interface extends JFrame{
         this.addWindowListener(exitListener);
     }
 
-
     // sets the menu bar and respective actions
     private void createMenuBar(){
         JMenuBar menubar = new JMenuBar();
 
-        JMenu fileMenu = new JMenu("File");
+        JMenu fileMenu = new JMenu("Datei");
 
-        JMenuItem selectMenuItem = new JMenuItem("New File");
+        JMenuItem selectMenuItem = new JMenuItem("Neue Datei");
         selectMenuItem.addActionListener((event) -> new_file());
         selectMenuItem.setMnemonic(KeyEvent.VK_N);
-        selectMenuItem.setToolTipText("Choose Directory and create new save file");
+        selectMenuItem.setToolTipText("Bildordner auswählen und eine neue Speicherdatei anlegen");
         fileMenu.add(selectMenuItem);
 
-        JMenuItem setDatabaseMenuItem = new JMenuItem("Set Database");
+        JMenuItem setDatabaseMenuItem = new JMenuItem("Bildordner wählen");
         setDatabaseMenuItem.addActionListener((event) -> setDatabase());
         setDatabaseMenuItem.setMnemonic(KeyEvent.VK_D);
-        setDatabaseMenuItem.setToolTipText("Set a new directory to load the images from");
+        setDatabaseMenuItem.setToolTipText("Legt einen neuen Ordner fest, aus dem die Bilder gelesen werden.");
         fileMenu.add(setDatabaseMenuItem);
 
         fileMenu.addSeparator();
 
-        JMenuItem saveAsMenuItem = new JMenuItem("Save as");
+        JMenuItem saveAsMenuItem = new JMenuItem("Speichern als");
         saveAsMenuItem.addActionListener((event) -> save_as(false));
         saveAsMenuItem.setMnemonic(KeyEvent.VK_A);
-        saveAsMenuItem.setToolTipText("Save data to a new file");
+        saveAsMenuItem.setToolTipText("Speichert eine Datei mit neuem Namen");
         fileMenu.add(saveAsMenuItem);
 
-        saveMenuItem = new JMenuItem("Save");
+        saveMenuItem = new JMenuItem("Speichern");
         saveMenuItem.addActionListener((event) -> save());
         saveMenuItem.setMnemonic(KeyEvent.VK_S);
         saveMenuItem.setEnabled(false);
-        saveMenuItem.setToolTipText("Save data to current file");
+        saveMenuItem.setToolTipText("Speichert die aktuelle Datei");
         fileMenu.add(saveMenuItem);
 
-        JMenuItem loadMenuItem = new JMenuItem("Load");
+        JMenuItem loadMenuItem = new JMenuItem("Laden");
         loadMenuItem.addActionListener((event) -> load());
         loadMenuItem.setMnemonic(KeyEvent.VK_L);
-        loadMenuItem.setToolTipText("Load data and database from a saved file");
+        loadMenuItem.setToolTipText("Lädt die Daten einer bereits bestehenden Datei");
         fileMenu.add(loadMenuItem);
 
         fileMenu.addSeparator();
 
-        JMenuItem clearMenuItem = new JMenuItem("Clear");
+        JMenuItem clearMenuItem = new JMenuItem("Zurücksetzen");
         clearMenuItem.addActionListener((event) -> clear_progress());
         clearMenuItem.setMnemonic(KeyEvent.VK_C);
-        clearMenuItem.setToolTipText("Resets memory of already labeled images and clears all set labels");
+        clearMenuItem.setToolTipText("Entfernt alle bestehenden labels und startet von vorne");
         fileMenu.add(clearMenuItem);
 
         menubar.add(fileMenu);
 
-        JMenu editMenu = new JMenu("Edit");
+        JMenu editMenu = new JMenu("Bearbeiten");
 
-        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels from File");
+        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels von Datei");
         labelsFromFileMenuItem.addActionListener((event) -> setLabelsFromFile());
-        labelsFromFileMenuItem.setToolTipText("Load custom labels from a specified file");
+        labelsFromFileMenuItem.setToolTipText("Lädt alle Labels aus einer gewählten (Text-)Datei");
         editMenu.add(labelsFromFileMenuItem);
 
-        JMenuItem createLabelMenuItem = new JMenuItem("Create Label");
+        JMenuItem createLabelMenuItem = new JMenuItem("Erstelle Label");
         createLabelMenuItem.addActionListener((event) -> createLabel());
-        createLabelMenuItem.setToolTipText("Create a new label");
+        createLabelMenuItem.setToolTipText("Erstellt ein neues Label");
         editMenu.add(createLabelMenuItem);
 
-        JMenuItem removeLabelMenuItem = new JMenuItem("Remove Label");
-        removeLabelMenuItem.addActionListener((event) -> removeLabel());
-        removeLabelMenuItem.setToolTipText("Remove an existing label");
+        JMenuItem removeLabelMenuItem = new JMenuItem("Entferne Label");
+        removeLabelMenuItem.addActionListener((event) -> removeLabel(true));
+        removeLabelMenuItem.setToolTipText("Entfernt ein bereits bestehendes Label");
         editMenu.add(removeLabelMenuItem);
 
         menubar.add(editMenu);
+
+        JMenu modeMenu = new JMenu("Bildreihenfolge");
+
+        // TODO: check if event needs to be changed to something different
+
+        ordered = new JRadioButtonMenuItem("Folgend");
+        ordered.setSelected(true);
+        ordered.setToolTipText("Zeigt die Bilder der Reihe nach wie im Ordner an");
+        //ordered.addActionListener((event) -> display_new());
+        modeMenu.add(ordered);
+
+        random = new JRadioButtonMenuItem("Zufällig");
+        random.setToolTipText("Zeigt die Bilder in zufälliger Reihenfolge an");
+        random.addActionListener((event) -> display_new());
+        modeMenu.add(random);
+
+        ButtonGroup imageOrder = new ButtonGroup();
+        imageOrder.add(ordered);
+        imageOrder.add(random);
 
         setJMenuBar(menubar);
     }
 
     // creates the actions to be assigned to the buttons and key strokes
     private void setActions(){
-        random = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                display_random();
-            }
-        };
+        // random = new AbstractAction() {
+        //    @Override
+        //    public void actionPerformed(ActionEvent e) {
+        //        display_new();
+        //    }
+        //};
         next = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -176,21 +194,19 @@ public class Interface extends JFrame{
     private void createLayout(){
 
         // defining all Layout items
-        JButton randomBtn = new JButton("Random");
-        JButton nextBtn = new JButton("Next");
-        JButton previousBtn = new JButton("Previous");
+        // JButton randomBtn = new JButton("Random");
+        JButton nextBtn = new JButton("Weiter");
+        JButton previousBtn = new JButton("Zurück");
         JButton findingBtn = new JButton("Finding");
         JButton noFindingBtn = new JButton("No Finding");
-
-        setCheckboxes();
 
         placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
-        current_file = new JLabel("Current Image:  ");
-        current_label = new JLabel("Finding:  ");
-        num_labeled = new JLabel("Labeled Files: 0");
+        current_file = new JLabel("Aktuelles Bild:  ");
+        current_label = new JLabel("Befund:  ");
+        num_labeled = new JLabel("Gelabelte Bilder: 0");
 
         Container pane = getContentPane();
         pane.add(panel);
@@ -204,6 +220,8 @@ public class Interface extends JFrame{
 
         // Creating the Layout
 
+        setCheckboxes();
+
         pGroup = gl.createParallelGroup();
         sGroup = gl.createSequentialGroup();
 
@@ -216,7 +234,6 @@ public class Interface extends JFrame{
                 gl.createSequentialGroup()
                     .addGroup(gl.createParallelGroup()
                         .addGroup(gl.createSequentialGroup()
-                                    .addComponent(randomBtn)
                                     .addComponent(previousBtn)
                                     .addComponent(nextBtn)
                                     .addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -236,7 +253,6 @@ public class Interface extends JFrame{
                 gl.createParallelGroup()
                     .addGroup(gl.createSequentialGroup()
                         .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(randomBtn)
                                 .addComponent(nextBtn)
                                 .addComponent(previousBtn)
                                 .addComponent(noFindingBtn)
@@ -249,15 +265,11 @@ public class Interface extends JFrame{
                     .addGroup(sGroup)
         );
 
-        gl.linkSize(randomBtn, nextBtn, previousBtn, findingBtn, noFindingBtn);
+        gl.linkSize(nextBtn, previousBtn, findingBtn, noFindingBtn);
         gl.linkSize(current_file, current_label, num_labeled);
 
         pack();
 
-        // adding actions to buttons
-        randomBtn.addActionListener(random);
-        randomBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("R"), "random");
-        randomBtn.getActionMap().put("random", random);
         nextBtn.addActionListener(next);
         nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "next");
         nextBtn.getActionMap().put("next", next);
@@ -271,15 +283,12 @@ public class Interface extends JFrame{
         noFindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "noFinding");
         noFindingBtn.getActionMap().put("noFinding", noFinding);
 
-
-        randomBtn.setToolTipText("Displays a random image");
-        nextBtn.setToolTipText("Displays next image in line or a random one");
-        previousBtn.setToolTipText("Displays labeled image (or random if none labeled)");
+        nextBtn.setToolTipText("Zeigt das nächste ");
+        previousBtn.setToolTipText("Geht zurück zu vorherigen (gelabelten) Bildern");
         findingBtn.setToolTipText("Mark image as 'finding detected' " +
                 "and add all checked findings (at least one required)");
         noFindingBtn.setToolTipText("Mark image as 'no finding detected'");
     }
-
 
     // functions for displaying the images
     private void setImage(File image){
@@ -288,7 +297,6 @@ public class Interface extends JFrame{
             this.setStatus(image);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(panel, "File not found");
-            System.out.println(e);
         }
     }
 
@@ -311,7 +319,7 @@ public class Interface extends JFrame{
         this.num_labeled.setText("Labeled Files: " + num_labeled);
     }
 
-    private void setCheckboxes(File image) {
+    private void fillCheckboxes(File image) {
         ArrayList<String> findings = this.data.get_findings(image);
         for (JCheckBox box : this.labels_box) {
             if(findings.contains(box.getText())) {
@@ -323,7 +331,7 @@ public class Interface extends JFrame{
         }
     }
 
-    private void resetCheckboxes() {
+    private void emptyCheckboxes() {
         for(JCheckBox box : this.labels_box){
             box.setSelected(false);
         }
@@ -331,24 +339,30 @@ public class Interface extends JFrame{
 
     // TODO: Add resizing for large images
     // TODO: reload frame auslagern/verbessern
-    private void display_random(){
+    private void display_new(){
         if(this.data==null){
-            JOptionPane.showMessageDialog(panel, "Please first create a database from File: New.",
-                    "Missing Database", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(panel, "Bitte wählen Sie zuerst einen Bildordner.",
+                    "Fehlende Datenbank", JOptionPane.WARNING_MESSAGE);
         }
         else {
             this.data.resetCounter();
-            resetCheckboxes();
+            emptyCheckboxes();
             //try {
                 //BufferedImage bimg_old = ImageIO.read(image_buffer);
             if (data.is_finished()){
-                JOptionPane.showMessageDialog(panel, "No more images left.",
-                        "Finished", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(panel, "Keine ungelabelten Bilder übrig",
+                        "Fertig", JOptionPane.INFORMATION_MESSAGE);
             }
             else {
-                image_buffer = this.data.get_random_file();
+                if(ordered.isSelected()){
+                    image_buffer = this.data.get_newest_file();
+                }
+                else if(random.isSelected()) {
+                    image_buffer = this.data.get_random_file();
+                }
                 //BufferedImage bimg_new = ImageIO.read(image_buffer);
                 latest_image = image_buffer;
+                // TODO this.setImageSize(image_buffer);
                 this.setImage(image_buffer);
                 //if (bimg_old.getWidth() != bimg_new.getWidth() || bimg_old.getHeight() != bimg_new.getHeight()) {
                 //    this.setVisible(false);
@@ -368,7 +382,7 @@ public class Interface extends JFrame{
         if (!data.labeled.isEmpty() || data.get_labeled_counter() > len) {
             image_buffer = this.data.labeled.get(len - this.data.get_labeled_counter());
             this.setImage(image_buffer);
-            this.setCheckboxes(image_buffer);
+            this.fillCheckboxes(image_buffer);
             }
         }
 
@@ -378,13 +392,13 @@ public class Interface extends JFrame{
         if (data.get_labeled_counter() == 0) {
             setImage(latest_image);
             image_buffer = latest_image;
-            resetCheckboxes();
+            emptyCheckboxes();
         }
         else {
             if (data.get_labeled_counter() > 0) {
                 image_buffer = this.data.labeled.get(len - this.data.get_labeled_counter());
                 this.setImage(image_buffer);
-                this.setCheckboxes(image_buffer);
+                this.fillCheckboxes(image_buffer);
             }
         }
     }
@@ -407,7 +421,7 @@ public class Interface extends JFrame{
         }
         else{
             this.data.add_label_entry(image_buffer, label, findings);
-            display_random();
+            display_new();
         }
     }
 
@@ -469,7 +483,7 @@ public class Interface extends JFrame{
             if (option == JFileChooser.APPROVE_OPTION) {
                 File img_dir = chooser.getSelectedFile();
                 data = new Database(img_dir);
-                this.display_random();
+                this.display_new();
             }
         }
     }
@@ -494,7 +508,7 @@ public class Interface extends JFrame{
             if (dialogResult == JOptionPane.YES_OPTION) {
                 this.data.clear_labeled();
                 this.data.clear_labels();
-                this.display_random();
+                this.display_new();
             }
         }
     }
@@ -514,7 +528,7 @@ public class Interface extends JFrame{
             this.data = new Database();
             this.data.load_from_json(saveFile);
             this.save_file = saveFile;
-            display_random();
+            display_new();
         }
     }
 
@@ -544,45 +558,51 @@ public class Interface extends JFrame{
 
     private void addCheckbox(String label){
         JCheckBox newLabel = new JCheckBox(label);
+        labels_box.add(newLabel);
         pGroup.addComponent(newLabel);
         sGroup.addComponent(newLabel);
         panel.revalidate();
         panel.repaint();
     }
 
-    private void removeLabel(){
-        int option = JOptionPane.showConfirmDialog(panel, "Removing a label will reset the current progress. " +
-                "Do you want to save your progress?");
+    private void removeLabel(boolean showMessage){
+        int option;
+        if(showMessage) {
+            option = JOptionPane.showConfirmDialog(panel,
+                    "Removing a label will reset the current progress.\n" +
+                    "Do you want to save your progress?");
+        }
+        else{
+            option = JOptionPane.OK_OPTION;
+        }
         if(option == JOptionPane.OK_OPTION){
-            if(save_file != null){
-                this.save();
-            }
-            else{
-                this.save_as(false);
-            }
+            this.save_as(false);
         }
 
         if(option == JOptionPane.OK_OPTION || option == JOptionPane.NO_OPTION) {
             String label = JOptionPane.showInputDialog(panel, "Enter the label you want to delete");
             if(label != null) {
                 this.data.remove_label(label);
-                //this.removeCheckbox(label);
+                this.removeCheckbox(label);
                 this.data.reset();
             }
         }
     }
 
-    //private void removeCheckbox(String label){
-    //    gl.get
-    //    this.revalidate();
-    //    this.repaint();
-    //}
+    private void removeCheckbox(String label){
+        for(JCheckBox box : labels_box){
+            if(box.getText().equals(label)){
+                labels_box.remove(box);
+            }
+        }
+        this.revalidate();
+        this.repaint();
+    }
 
     private void setCheckboxes(){
-        labels_box = new JCheckBox[data.labels_template.labels.size()];
-
+        labels_box.clear();
         for(int i = 0; i<data.labels_template.labels.size(); i++){
-            labels_box[i] = new JCheckBox(data.labels_template.labels.get(i));
+            labels_box.add(new JCheckBox(data.labels_template.labels.get(i)));
         }
     }
 

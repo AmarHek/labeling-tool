@@ -108,6 +108,10 @@ public class Database {
         return this.image_files.get(randomIndex);
     }
 
+    public File get_newest_file(){
+        return this.image_files.get(0);
+    }
+
     public ArrayList<String> get_findings(File file){
         return this.findings.get(file.getName());
     }
