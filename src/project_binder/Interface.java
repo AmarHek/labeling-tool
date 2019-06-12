@@ -133,7 +133,7 @@ public class Interface extends JFrame{
 
         menubar.add(editMenu);
 
-        JMenu modeMenu = new JMenu("Bildreihenfolge");
+        JMenu orderMenu = new JMenu("Bildreihenfolge");
 
         // TODO: check if event needs to be changed to something different
 
@@ -141,16 +141,18 @@ public class Interface extends JFrame{
         ordered.setSelected(true);
         ordered.setToolTipText("Zeigt die Bilder der Reihe nach wie im Ordner an");
         //ordered.addActionListener((event) -> display_new());
-        modeMenu.add(ordered);
+        orderMenu.add(ordered);
 
         random = new JRadioButtonMenuItem("Zufällig");
         random.setToolTipText("Zeigt die Bilder in zufälliger Reihenfolge an");
         random.addActionListener((event) -> display_new());
-        modeMenu.add(random);
+        orderMenu.add(random);
 
         ButtonGroup imageOrder = new ButtonGroup();
         imageOrder.add(ordered);
         imageOrder.add(random);
+
+        menubar.add(orderMenu);
 
         setJMenuBar(menubar);
     }
@@ -590,11 +592,14 @@ public class Interface extends JFrame{
     }
 
     private void removeCheckbox(String label){
+        JCheckBox toRemove = new JCheckBox();
         for(JCheckBox box : labels_box){
             if(box.getText().equals(label)){
-                labels_box.remove(box);
+                toRemove = box;
             }
         }
+        panel.remove(toRemove);
+        labels_box.remove(toRemove);
         this.revalidate();
         this.repaint();
     }
