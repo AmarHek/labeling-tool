@@ -140,7 +140,7 @@ public class Interface extends JFrame{
         ordered = new JRadioButtonMenuItem("Folgend");
         ordered.setSelected(true);
         ordered.setToolTipText("Zeigt die Bilder der Reihe nach wie im Ordner an");
-        //ordered.addActionListener((event) -> display_new());
+        ordered.addActionListener((event) -> display_new());
         orderMenu.add(ordered);
 
         random = new JRadioButtonMenuItem("Zufällig");
