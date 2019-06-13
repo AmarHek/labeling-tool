@@ -127,7 +127,7 @@ public class Interface extends JFrame{
         editMenu.add(createLabelMenuItem);
 
         JMenuItem removeLabelMenuItem = new JMenuItem("Entferne Label");
-        removeLabelMenuItem.addActionListener((event) -> removeLabel(true));
+        removeLabelMenuItem.addActionListener((event) -> removeLabel());
         removeLabelMenuItem.setToolTipText("Entfernt ein bereits bestehendes Label");
         editMenu.add(removeLabelMenuItem);
 
@@ -207,7 +207,7 @@ public class Interface extends JFrame{
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
         current_file = new JLabel("Aktuelles Bild:  ");
-        current_label = new JLabel("Befund:  ");
+        current_label = new JLabel("Befund(e):  ");
         num_labeled = new JLabel("Gelabelte Bilder: 0");
 
         Container pane = getContentPane();
@@ -298,7 +298,7 @@ public class Interface extends JFrame{
             this.image_label.setIcon(new ImageIcon(image.getPath()));
             this.setStatus(image);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(panel, "File not found");
+            JOptionPane.showMessageDialog(panel, "Datei nicht gefunden");
         }
     }
 
@@ -316,9 +316,9 @@ public class Interface extends JFrame{
         else{
             label = "Yes";
         }
-        this.current_file.setText("Current File: " + filename);
-        this.current_label.setText("Finding: " + label);
-        this.num_labeled.setText("Labeled Files: " + num_labeled);
+        this.current_file.setText("Aktuelles Bild: " + filename);
+        this.current_label.setText("Befund(e): " + label);
+        this.num_labeled.setText("Gelabelte Bilder: " + num_labeled);
     }
 
     private void fillCheckboxes(File image) {
@@ -418,8 +418,8 @@ public class Interface extends JFrame{
 
     private void addLabel(int label, ArrayList<String> findings){
         if(image_buffer.getPath().equals(placeholder)){
-            JOptionPane.showMessageDialog(panel, "No suitable image selected yet.",
-                    "No Image", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(panel, "Kein Bild zum Labeln vorhanden.",
+                    "Kein Bild", JOptionPane.WARNING_MESSAGE);
         }
         else{
             this.data.add_label_entry(image_buffer, label, findings);
@@ -448,8 +448,8 @@ public class Interface extends JFrame{
         int option;
         if(showDialog){
             option = JOptionPane.showConfirmDialog(panel,
-                    "Choose a location for your save file.",
-                    "Save Dialog", JOptionPane.OK_CANCEL_OPTION);
+                    "Wählen Sie einen Ort für ihre Speicherdatei.",
+                    "Speicher-Dialog", JOptionPane.OK_CANCEL_OPTION);
         }
         else{
             option = JOptionPane.OK_OPTION;
@@ -471,12 +471,12 @@ public class Interface extends JFrame{
         int option;
         if (this.data.img_dir != null){
             option = JOptionPane.showConfirmDialog(panel,
-                    "Database already exists. Do you still want to change it?",
-                        "Confirm Dialog", JOptionPane.OK_CANCEL_OPTION);
+                    "Ein aktiver Bildordner ist bereits ausgewählt.\n Möchten Sie den Ordner trotzdem ändern?",
+                        "Bestätigungs-Dialog", JOptionPane.OK_CANCEL_OPTION);
         }
         else{
-            option = JOptionPane.showConfirmDialog(panel, "Choose image directory",
-                    "Directory Dialog", JOptionPane.OK_CANCEL_OPTION);
+            option = JOptionPane.showConfirmDialog(panel, "Wählen Sie den Bildordner",
+                    "Ordner-Dialog", JOptionPane.OK_CANCEL_OPTION);
         }
         if (option == JOptionPane.OK_OPTION) {
             JFileChooser chooser = new JFileChooser("./");
@@ -501,11 +501,11 @@ public class Interface extends JFrame{
 
     private void clear_progress(){
         if(this.data == null){
-            JOptionPane.showMessageDialog(panel, "No database to clear.",
-                    "Missing Database", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(panel, "Bildordner ist noch nicht ausgewählt.",
+                    "Fehlende Datenbank", JOptionPane.INFORMATION_MESSAGE);
         }
         else {
-            int dialogResult = JOptionPane.showConfirmDialog(panel, "Clear all progress?",
+            int dialogResult = JOptionPane.showConfirmDialog(panel, "Soll der bisherige Fortschritt gelöscht werden?",
                     null, JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
                 this.data.clear_labeled();
@@ -548,7 +548,7 @@ public class Interface extends JFrame{
     }
 
     private void createLabel(){
-        String label = JOptionPane.showInputDialog(panel, "Enter the new label");
+        String label = JOptionPane.showInputDialog(panel, "Geben Sie das neue Label ein.");
         if(label != null){
             label = label.trim();
             if(!data.labels_template.labels.contains(label.trim())){
@@ -567,27 +567,11 @@ public class Interface extends JFrame{
         panel.repaint();
     }
 
-    private void removeLabel(boolean showMessage){
-        int option;
-        if(showMessage) {
-            option = JOptionPane.showConfirmDialog(panel,
-                    "Removing a label will reset the current progress.\n" +
-                    "Do you want to save your progress?");
-        }
-        else{
-            option = JOptionPane.OK_OPTION;
-        }
-        if(option == JOptionPane.OK_OPTION){
-            this.save_as(false);
-        }
-
-        if(option == JOptionPane.OK_OPTION || option == JOptionPane.NO_OPTION) {
-            String label = JOptionPane.showInputDialog(panel, "Enter the label you want to delete");
-            if(label != null) {
-                this.data.remove_label(label);
-                this.removeCheckbox(label);
-                this.data.reset();
-            }
+    private void removeLabel(){
+        String label = JOptionPane.showInputDialog(panel, "Geben Sie das Label an, das entfernt werden soll.");
+        if(label != null) {
+            this.data.remove_label(label);
+            this.removeCheckbox(label);
         }
     }
 
