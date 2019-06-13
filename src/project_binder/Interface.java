@@ -1,10 +1,12 @@
 package project_binder;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -56,8 +58,6 @@ public class Interface extends JFrame{
         createLayout();
 
         this.setTitle("Labeling Tool");
-        //TODO: Variable size
-        //setSize(1000, 800);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -109,17 +109,12 @@ public class Interface extends JFrame{
         JMenuItem clearMenuItem = new JMenuItem("Zurücksetzen");
         clearMenuItem.addActionListener((event) -> clear_progress());
         clearMenuItem.setMnemonic(KeyEvent.VK_C);
-        clearMenuItem.setToolTipText("Entfernt alle bestehenden labels und startet von vorne");
+        clearMenuItem.setToolTipText("Entfernt alle bestehenden Labels und startet von vorne");
         fileMenu.add(clearMenuItem);
 
         menubar.add(fileMenu);
 
-        JMenu editMenu = new JMenu("Bearbeiten");
-
-        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels von Datei");
-        labelsFromFileMenuItem.addActionListener((event) -> setLabelsFromFile());
-        labelsFromFileMenuItem.setToolTipText("Lädt alle Labels aus einer gewählten (Text-)Datei");
-        editMenu.add(labelsFromFileMenuItem);
+        JMenu editMenu = new JMenu("Labels Bearbeiten");
 
         JMenuItem createLabelMenuItem = new JMenuItem("Erstelle Label");
         createLabelMenuItem.addActionListener((event) -> createLabel());
@@ -130,6 +125,19 @@ public class Interface extends JFrame{
         removeLabelMenuItem.addActionListener((event) -> removeLabel());
         removeLabelMenuItem.setToolTipText("Entfernt ein bereits bestehendes Label");
         editMenu.add(removeLabelMenuItem);
+
+        editMenu.addSeparator();
+
+        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels von Datei");
+        labelsFromFileMenuItem.addActionListener((event) -> createLabelsFromFile());
+        labelsFromFileMenuItem.setToolTipText("Lädt alle Labels aus einer gewählten (Text-)Datei");
+        editMenu.add(labelsFromFileMenuItem);
+
+        JMenuItem clearLabels = new JMenuItem("Alle Labels löschen");
+        clearLabels.addActionListener((event) -> removeAllLabels(true));
+        clearLabels.setToolTipText("Entfernt alle vorhandenen Labels von der Oberfläche.\n" +
+                "Gelabelte Bilder behalten ihre Labels, gehen Sie hierfür auf Datei -> Zurücksetzen.");
+        editMenu.add(clearLabels);
 
         menubar.add(editMenu);
 
@@ -222,10 +230,10 @@ public class Interface extends JFrame{
 
         // Creating the Layout
 
-        setCheckboxes();
-
         pGroup = gl.createParallelGroup();
         sGroup = gl.createSequentialGroup();
+
+        setCheckboxes();
 
         for(JCheckBox box : labels_box){
             pGroup.addComponent(box);
@@ -234,11 +242,11 @@ public class Interface extends JFrame{
 
         gl.setHorizontalGroup(
                 gl.createSequentialGroup()
-                    .addGroup(gl.createParallelGroup()
+                    .addGroup(gl.createParallelGroup(GroupLayout.Alignment.CENTER)
                         .addGroup(gl.createSequentialGroup()
                                     .addComponent(previousBtn)
                                     .addComponent(nextBtn)
-                                    .addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGap(0, 200, 1000)
                                     .addComponent(noFindingBtn)
                                     .addComponent(findingBtn))
                         .addComponent(image_label)
@@ -270,19 +278,21 @@ public class Interface extends JFrame{
         gl.linkSize(nextBtn, previousBtn, findingBtn, noFindingBtn);
         gl.linkSize(current_file, current_label, num_labeled);
 
-        pack();
-
         nextBtn.addActionListener(next);
-        nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "next");
+        nextBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"),
+                "next");
         nextBtn.getActionMap().put("next", next);
         previousBtn.addActionListener(previous);
-        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "labeled");
+        previousBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"),
+                "labeled");
         previousBtn.getActionMap().put("labeled", previous);
         findingBtn.addActionListener(finding);
-        findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "finding");
+        findingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"),
+                "finding");
         findingBtn.getActionMap().put("finding", finding);
         noFindingBtn.addActionListener(noFinding);
-        noFindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "noFinding");
+        noFindingBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"),
+                "noFinding");
         noFindingBtn.getActionMap().put("noFinding", noFinding);
 
         nextBtn.setToolTipText("Zeigt das nächste ");
@@ -290,16 +300,62 @@ public class Interface extends JFrame{
         findingBtn.setToolTipText("Mark image as 'finding detected' " +
                 "and add all checked findings (at least one required)");
         noFindingBtn.setToolTipText("Mark image as 'no finding detected'");
+
+        pack();
     }
 
     // functions for displaying the images
     private void setImage(File image){
         try {
-            this.image_label.setIcon(new ImageIcon(image.getPath()));
+            BufferedImage buffered = ImageIO.read(image);
+            buffered = this.resizeImage(buffered);
+            this.image_label.setIcon(new ImageIcon(buffered));
             this.setStatus(image);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(panel, "Datei nicht gefunden");
         }
+    }
+
+    private BufferedImage resizeImage(BufferedImage image){
+        double resize_factor = 0.7;
+        double new_height;
+        double new_width;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double max_height = screenSize.getHeight();
+        double max_width = screenSize.getWidth();
+
+        double old_height = (double) image.getHeight();
+        double old_width = (double) image.getWidth();
+
+        if(old_height > resize_factor * max_height){
+            new_height = resize_factor * max_height;
+            new_width = (new_height / old_height) * old_width;
+        }
+        else if(old_width > resize_factor * max_width){
+            new_width = resize_factor * max_width;
+            new_height = (new_width / old_width) * old_height;
+        }
+        else if(old_height < 250){
+            new_height = 500;
+            new_width = (new_height / old_height) * old_width;
+        }
+        else if(old_width < 250){
+            new_width = 500;
+            new_height = (new_width / old_width) * old_height;
+        }
+        else{
+            new_height = old_height;
+            new_width = old_width;
+    }
+        BufferedImage resized = new BufferedImage((int) new_width, (int) new_height, image.getType());
+        Graphics2D g = resized.createGraphics();
+        g.drawImage(image, 0, 0, (int) new_width, (int) new_height, null);
+        g.dispose();
+        g.setComposite(AlphaComposite.Src);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        return resized;
     }
 
     // change status bar
@@ -349,8 +405,6 @@ public class Interface extends JFrame{
         else {
             this.data.resetCounter();
             emptyCheckboxes();
-            //try {
-                //BufferedImage bimg_old = ImageIO.read(image_buffer);
             if (data.is_finished()){
                 JOptionPane.showMessageDialog(panel, "Keine ungelabelten Bilder übrig",
                         "Fertig", JOptionPane.INFORMATION_MESSAGE);
@@ -362,18 +416,8 @@ public class Interface extends JFrame{
                 else if(random.isSelected()) {
                     image_buffer = this.data.get_random_file();
                 }
-                //BufferedImage bimg_new = ImageIO.read(image_buffer);
                 latest_image = image_buffer;
-                // TODO this.setImageSize(image_buffer);
                 this.setImage(image_buffer);
-                //if (bimg_old.getWidth() != bimg_new.getWidth() || bimg_old.getHeight() != bimg_new.getHeight()) {
-                //    this.setVisible(false);
-                //    this.setVisible(true);
-                //}
-                //}
-                //catch (IOException ex) {
-                //    System.out.println(ex.getMessage());
-                //}
             }
         }
     }
@@ -534,16 +578,19 @@ public class Interface extends JFrame{
         }
     }
 
-    private void setLabelsFromFile(){
+    private void createLabelsFromFile(){
         // specify a file to load the labels from
         JFileChooser chooser = new JFileChooser("./");
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.txt", "txt", "text");
         chooser.setFileFilter(filter);
         int option = chooser.showOpenDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File labelsFile = chooser.getSelectedFile();
             this.data.set_labels_template(labelsFile);
-            this.setCheckboxes();
+            this.removeAllLabels(false);
+            for(String label : this.data.labels_template.labels) {
+                this.createCheckbox(label);
+            }
         }
     }
 
@@ -553,12 +600,12 @@ public class Interface extends JFrame{
             label = label.trim();
             if(!data.labels_template.labels.contains(label.trim())){
                 this.data.labels_template.add_label(label);
-                this.addCheckbox(label);
+                this.createCheckbox(label);
             }
         }
     }
 
-    private void addCheckbox(String label){
+    private void createCheckbox(String label){
         JCheckBox newLabel = new JCheckBox(label);
         labels_box.add(newLabel);
         pGroup.addComponent(newLabel);
@@ -588,6 +635,27 @@ public class Interface extends JFrame{
         this.repaint();
     }
 
+    private void removeAllLabels(boolean askMessage){
+        int option;
+        if(askMessage){
+            option = JOptionPane.showConfirmDialog(panel,
+                    "Möchten Sie wirklich alle Labels löschen?");
+        }
+        else{
+            option = JOptionPane.OK_OPTION;
+        }
+
+        if(option == JOptionPane.OK_OPTION && labels_box.size() > 0){
+            for(JCheckBox box : labels_box){
+                this.data.remove_label(box.getText());
+                panel.remove(box);
+            }
+            labels_box.clear();
+            this.revalidate();
+            this.repaint();
+        }
+    }
+
     private void setCheckboxes(){
         labels_box.clear();
         for(int i = 0; i<data.labels_template.labels.size(); i++){
@@ -600,7 +668,7 @@ public class Interface extends JFrame{
             @Override
             public void windowClosing(WindowEvent e) {
                 int result = JOptionPane.showConfirmDialog(panel,
-                        "Do you want to save your progress before exiting?");
+                        "Vor dem Verlassen speichern?");
                 if (result == JOptionPane.YES_OPTION) {
                     if(saveMenuItem.isEnabled()){
                         save();
