@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static javax.swing.LayoutStyle.ComponentPlacement.*;
 
@@ -21,6 +22,7 @@ public class Interface extends JFrame{
     private JLabel current_file;
     private JLabel current_label;
     private JLabel num_labeled;
+    private String[] statusBar;
 
     private String placeholder;
 
@@ -43,7 +45,6 @@ public class Interface extends JFrame{
 
     private JMenuItem saveMenuItem;
 
-    private GroupLayout gl;
     private GroupLayout.ParallelGroup pGroup;
     private GroupLayout.SequentialGroup sGroup;
 
@@ -60,6 +61,8 @@ public class Interface extends JFrame{
         this.setTitle("Labeling Tool");
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        Locale locale = new Locale("de", "GER");
+        JOptionPane.setDefaultLocale(locale);
 
         WindowListener exitListener = exit();
         this.addWindowListener(exitListener);
@@ -114,7 +117,7 @@ public class Interface extends JFrame{
 
         menubar.add(fileMenu);
 
-        JMenu editMenu = new JMenu("Labels Bearbeiten");
+        JMenu editMenu = new JMenu("Bearbeiten");
 
         JMenuItem createLabelMenuItem = new JMenuItem("Erstelle Label");
         createLabelMenuItem.addActionListener((event) -> createLabel());
@@ -128,7 +131,7 @@ public class Interface extends JFrame{
 
         editMenu.addSeparator();
 
-        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels von Datei");
+        JMenuItem labelsFromFileMenuItem = new JMenuItem("Labels aus Datei");
         labelsFromFileMenuItem.addActionListener((event) -> createLabelsFromFile());
         labelsFromFileMenuItem.setToolTipText("Lädt alle Labels aus einer gewählten (Text-)Datei");
         editMenu.add(labelsFromFileMenuItem);
@@ -139,11 +142,16 @@ public class Interface extends JFrame{
                 "Gelabelte Bilder behalten ihre Labels, gehen Sie hierfür auf Datei -> Zurücksetzen.");
         editMenu.add(clearLabels);
 
+        editMenu.addSeparator();
+
+        JMenuItem changeStatusBarMenuItem = new JMenuItem("Statusleiste bearbeiten");
+        changeStatusBarMenuItem.addActionListener((event) -> editStatusBar());
+        changeStatusBarMenuItem.setToolTipText("Erlaubt das Umbenennen der Elemente in der Statusleiste");
+        editMenu.add(changeStatusBarMenuItem);
+
         menubar.add(editMenu);
 
         JMenu orderMenu = new JMenu("Bildreihenfolge");
-
-        // TODO: check if event needs to be changed to something different
 
         ordered = new JRadioButtonMenuItem("Folgend");
         ordered.setSelected(true);
@@ -207,26 +215,23 @@ public class Interface extends JFrame{
         // JButton randomBtn = new JButton("Random");
         JButton nextBtn = new JButton("Weiter");
         JButton previousBtn = new JButton("Zurück");
-        JButton findingBtn = new JButton("Finding");
-        JButton noFindingBtn = new JButton("No Finding");
+        JButton findingBtn = new JButton("Befund");
+        JButton noFindingBtn = new JButton("Kein Befund");
 
         placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
-        current_file = new JLabel("Aktuelles Bild:  ");
-        current_label = new JLabel("Befund(e):  ");
-        num_labeled = new JLabel("Gelabelte Bilder: 0");
+        statusBar = new String[]{"Aktuelles Bild", "Gesund", "Gelabelte Bilder"};
+        initializeStatusBar();
 
         Container pane = getContentPane();
         pane.add(panel);
-        gl = new GroupLayout(panel);
+        GroupLayout gl = new GroupLayout(panel);
         panel.setLayout(gl);
 
         gl.setAutoCreateContainerGaps(true);
         gl.setAutoCreateGaps(true);
-
-        //TODO: Improve Layout -> Dynamic
 
         // Creating the Layout
 
@@ -257,6 +262,7 @@ public class Interface extends JFrame{
                                     .addPreferredGap(RELATED, 20, 100)
                                     .addComponent(num_labeled)))
                     .addGroup(pGroup)
+                    .addGap(0, 20, 50)
         );
 
         gl.setVerticalGroup(
@@ -311,13 +317,15 @@ public class Interface extends JFrame{
             buffered = this.resizeImage(buffered);
             this.image_label.setIcon(new ImageIcon(buffered));
             this.setStatus(image);
+            pack();
+            setLocationRelativeTo(null);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(panel, "Datei nicht gefunden");
         }
     }
 
     private BufferedImage resizeImage(BufferedImage image){
-        double resize_factor = 0.7;
+        double resize_factor = 0.8;
         double new_height;
         double new_width;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -372,9 +380,47 @@ public class Interface extends JFrame{
         else{
             label = "Yes";
         }
-        this.current_file.setText("Aktuelles Bild: " + filename);
-        this.current_label.setText("Befund(e): " + label);
-        this.num_labeled.setText("Gelabelte Bilder: " + num_labeled);
+        this.current_file.setText(statusBar[0] + ": " + filename);
+        this.current_label.setText(statusBar[1] +": " + label);
+        this.num_labeled.setText(statusBar[2]+ ": " + num_labeled);
+    }
+
+    private void initializeStatusBar(){
+        if(current_file == null) {
+            current_file = new JLabel(statusBar[0] + ": ");
+            current_label = new JLabel(statusBar[1] + ": ");
+            num_labeled = new JLabel(statusBar[2] + ": 0");
+        }
+        else{
+            this.current_file.setText(statusBar[0] + ": ");
+            this.current_label.setText(statusBar[1] +": ");
+            this.num_labeled.setText(statusBar[2]+ ": 0");
+        }
+    }
+
+    private void editStatusBar(){
+        String choice = JOptionPane.showInputDialog("Welches Statuselement möchten Sie umbenennen? \n" +
+                "(1 = "+statusBar[0]+", 2 = "+statusBar[1]+", 3 = "+statusBar[2]+")");
+        if(choice != null){
+            choice = choice.trim();
+            if(!(choice.equals("1") || choice.equals("2") || choice.equals("3"))){
+                JOptionPane.showMessageDialog(panel, "Ungültige Auswahl");
+            }
+            else {
+                String newName = JOptionPane.showInputDialog("Geben Sie die neue Bezeichnung ein.");
+                if (newName != null) {
+                    System.out.println(statusBar[0]+statusBar[1]+statusBar[2]);
+                    statusBar[Integer.parseInt(choice)-1] = newName.trim();
+                    System.out.println(statusBar[0]+statusBar[1]+statusBar[2]);
+                    if(this.data.img_dir == null) {
+                        initializeStatusBar();
+                    }
+                    else{
+                        setStatus(image_buffer);
+                    }
+                }
+            }
+        }
     }
 
     private void fillCheckboxes(File image) {
@@ -395,8 +441,6 @@ public class Interface extends JFrame{
         }
     }
 
-    // TODO: Add resizing for large images
-    // TODO: reload frame auslagern/verbessern
     private void display_new(){
         if(this.data==null){
             JOptionPane.showMessageDialog(panel, "Bitte wählen Sie zuerst einen Bildordner.",
@@ -571,9 +615,13 @@ public class Interface extends JFrame{
         int option = chooser.showOpenDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File saveFile = chooser.getSelectedFile();
+            this.removeAllLabels(false);
             this.data = new Database();
             this.data.load_from_json(saveFile);
             this.save_file = saveFile;
+            for(String label : this.data.labels_template.labels){
+                this.createCheckbox(label);
+            }
             display_new();
         }
     }
@@ -586,8 +634,8 @@ public class Interface extends JFrame{
         int option = chooser.showOpenDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File labelsFile = chooser.getSelectedFile();
-            this.data.set_labels_template(labelsFile);
             this.removeAllLabels(false);
+            this.data.set_labels_template(labelsFile);
             for(String label : this.data.labels_template.labels) {
                 this.createCheckbox(label);
             }
@@ -612,6 +660,7 @@ public class Interface extends JFrame{
         sGroup.addComponent(newLabel);
         panel.revalidate();
         panel.repaint();
+        pack();
     }
 
     private void removeLabel(){
@@ -631,8 +680,9 @@ public class Interface extends JFrame{
         }
         panel.remove(toRemove);
         labels_box.remove(toRemove);
-        this.revalidate();
-        this.repaint();
+        panel.revalidate();
+        panel.repaint();
+        pack();
     }
 
     private void removeAllLabels(boolean askMessage){
@@ -651,8 +701,9 @@ public class Interface extends JFrame{
                 panel.remove(box);
             }
             labels_box.clear();
-            this.revalidate();
-            this.repaint();
+            panel.revalidate();
+            panel.repaint();
+            pack();
         }
     }
 
@@ -683,8 +734,6 @@ public class Interface extends JFrame{
             }
         };
     }
-
-
 
     public static void main(String[] args){
         java.util.Locale.setDefault(java.util.Locale.ENGLISH);
