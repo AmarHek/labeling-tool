@@ -232,7 +232,6 @@ public class Interface extends JFrame{
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
-        statusBar = new String[]{"Aktuelles Bild", "Gesund", "Gelabelte Bilder"};
         initializeStatusBar();
 
         Container pane = getContentPane();
@@ -397,6 +396,7 @@ public class Interface extends JFrame{
 
     private void initializeStatusBar(){
         if(current_file == null) {
+            statusBar = new String[]{"Aktuelles Bild", "Befund", "Gelabelte Bilder"};
             current_file = new JLabel(statusBar[0] + ": ");
             current_label = new JLabel(statusBar[1] + ": ");
             num_labeled = new JLabel(statusBar[2] + ": 0");
