@@ -69,6 +69,8 @@ public class Interface extends JFrame{
 
         WindowListener exitListener = exit();
         this.addWindowListener(exitListener);
+
+        //this.loadBootOptions();
     }
 
     // sets the menu bar and respective actions
@@ -657,6 +659,14 @@ public class Interface extends JFrame{
         }
     }
 
+    //private void saveBootOptions(){
+    //    String boot_path = "src/resources/bootopions.json"
+    //}
+
+    //private void loadBootOptions(){
+//
+    //}
+
     private void createLabelsFromFile(){
         // specify a file to load the labels from
         JFileChooser chooser = new JFileChooser("./");
@@ -758,8 +768,10 @@ public class Interface extends JFrame{
                     else {
                         save_as(false);
                     }
+                    //saveBootOptions();
                     System.exit(0);
                 } else if (result == JOptionPane.NO_OPTION) {
+                    //saveBootOptions();
                     System.exit(0);
                 }
             }
