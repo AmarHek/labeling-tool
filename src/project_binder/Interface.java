@@ -40,6 +40,9 @@ public class Interface extends JFrame{
     private Action finding;
     private Action noFinding;
 
+    private JButton findingBtn;
+    private JButton noFindingBtn;
+
     private JRadioButtonMenuItem ordered;
     private JRadioButtonMenuItem random;
 
@@ -149,6 +152,11 @@ public class Interface extends JFrame{
         changeStatusBarMenuItem.setToolTipText("Erlaubt das Umbenennen der Elemente in der Statusleiste");
         editMenu.add(changeStatusBarMenuItem);
 
+        JMenuItem changeButtonLabelMenuItem = new JMenuItem("Button umbenennen");
+        changeButtonLabelMenuItem.addActionListener((event) -> changeButtonLabel());
+        changeButtonLabelMenuItem.setToolTipText("Erlaubt das Ändern der Button-Beschriftung");
+        editMenu.add(changeButtonLabelMenuItem);
+
         menubar.add(editMenu);
 
         JMenu orderMenu = new JMenu("Bildreihenfolge");
@@ -215,8 +223,8 @@ public class Interface extends JFrame{
         // JButton randomBtn = new JButton("Random");
         JButton nextBtn = new JButton("Weiter");
         JButton previousBtn = new JButton("Zurück");
-        JButton findingBtn = new JButton("Befund");
-        JButton noFindingBtn = new JButton("Kein Befund");
+        findingBtn = new JButton("Befund");
+        noFindingBtn = new JButton("Kein Befund");
 
         placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
@@ -375,10 +383,10 @@ public class Interface extends JFrame{
             label = " ";
         }
         else if(data.labels.get(image.getName()) == 0){
-            label = "No";
+            label = "Nein";
         }
         else{
-            label = "Yes";
+            label = "Ja";
         }
         this.current_file.setText(statusBar[0] + ": " + filename);
         this.current_label.setText(statusBar[1] +": " + label);
@@ -409,9 +417,7 @@ public class Interface extends JFrame{
             else {
                 String newName = JOptionPane.showInputDialog("Geben Sie die neue Bezeichnung ein.");
                 if (newName != null) {
-                    System.out.println(statusBar[0]+statusBar[1]+statusBar[2]);
                     statusBar[Integer.parseInt(choice)-1] = newName.trim();
-                    System.out.println(statusBar[0]+statusBar[1]+statusBar[2]);
                     if(this.data.img_dir == null) {
                         initializeStatusBar();
                     }
@@ -419,6 +425,31 @@ public class Interface extends JFrame{
                         setStatus(image_buffer);
                     }
                 }
+            }
+        }
+    }
+
+    private void changeButtonLabel(){
+        String choice = JOptionPane.showInputDialog("Welchen Button möchten Sie umbenennen? \n" +
+                "(1 = "+findingBtn.getText()+", 2 = "+noFindingBtn.getText());
+        if(choice != null) {
+            choice = choice.trim();
+            if (choice.equals("1")) {
+                String newName = JOptionPane.showInputDialog("Geben Sie den neuen Namen ein.");
+                if (newName != null) {
+                    findingBtn.setText(newName.trim());
+                    revalidate();
+                    repaint();
+                }
+            } else if (choice.equals("2")) {
+                String newName = JOptionPane.showInputDialog("Geben Sie den neuen Namen ein.");
+                if (newName != null) {
+                    noFindingBtn.setText(newName.trim());
+                    revalidate();
+                    repaint();
+                }
+            } else {
+                JOptionPane.showMessageDialog(panel, "Ungültige Auswahl");
             }
         }
     }
