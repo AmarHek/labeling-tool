@@ -1,5 +1,10 @@
 package project_binder;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -8,8 +13,13 @@ import java.awt.event.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static javax.swing.LayoutStyle.ComponentPlacement.*;
 
@@ -24,7 +34,8 @@ public class Interface extends JFrame{
     private JLabel num_labeled;
     private String[] statusBar;
 
-    private String placeholder;
+    private String placeholder = "src/resources/Platzhalter.png";
+    private File boot_file = new File("src/resources/bootoptions.json");
 
     // image variables
     private JLabel image_label;
@@ -70,7 +81,7 @@ public class Interface extends JFrame{
         WindowListener exitListener = exit();
         this.addWindowListener(exitListener);
 
-        //this.loadBootOptions();
+        this.loadBootOptions();
     }
 
     // sets the menu bar and respective actions
@@ -159,6 +170,13 @@ public class Interface extends JFrame{
         changeButtonLabelMenuItem.setToolTipText("Erlaubt das Ändern der Button-Beschriftung");
         editMenu.add(changeButtonLabelMenuItem);
 
+        editMenu.addSeparator();
+
+        JMenuItem resetButtonStatusMenuItem = new JMenuItem("Zurücksetzen");
+        resetButtonStatusMenuItem.addActionListener((event) -> resetBootOptions());
+        resetButtonStatusMenuItem.setToolTipText("Setzt die Beschriftungen der Buttons und der Statusleiste zurück");
+        editMenu.add(resetButtonStatusMenuItem);
+
         menubar.add(editMenu);
 
         JMenu orderMenu = new JMenu("Bildreihenfolge");
@@ -228,7 +246,6 @@ public class Interface extends JFrame{
         findingBtn = new JButton("Befund");
         noFindingBtn = new JButton("Kein Befund");
 
-        placeholder = "src/resources/Platzhalter.png";
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
@@ -390,7 +407,7 @@ public class Interface extends JFrame{
             label = "Ja";
         }
         this.current_file.setText(statusBar[0] + ": " + filename);
-        this.current_label.setText(statusBar[1] +": " + label);
+        this.current_label.setText(statusBar[1] + ": " + label);
         this.num_labeled.setText(statusBar[2]+ ": " + num_labeled);
     }
 
@@ -483,8 +500,10 @@ public class Interface extends JFrame{
             this.data.resetCounter();
             emptyCheckboxes();
             if (data.is_finished()){
-                JOptionPane.showMessageDialog(panel, "Keine ungelabelten Bilder übrig",
-                        "Fertig", JOptionPane.INFORMATION_MESSAGE);
+                if(save_file != null) {
+                    JOptionPane.showMessageDialog(panel, "Keine ungelabelten Bilder übrig",
+                            "Fertig", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
             else {
                 if(ordered.isSelected()){
@@ -544,7 +563,8 @@ public class Interface extends JFrame{
         }
         else{
             this.data.add_label_entry(image_buffer, label, findings);
-            display_new();
+            this.setStatus(image_buffer);
+            this.display_new();
         }
     }
 
@@ -652,6 +672,7 @@ public class Interface extends JFrame{
             this.data = new Database();
             this.data.load_from_json(saveFile);
             this.save_file = saveFile;
+            this.saveMenuItem.setEnabled(true);
             for(String label : this.data.labels_template.labels){
                 this.createCheckbox(label);
             }
@@ -659,13 +680,114 @@ public class Interface extends JFrame{
         }
     }
 
-    //private void saveBootOptions(){
-    //    String boot_path = "src/resources/bootopions.json"
-    //}
+    private void load_on_startup(){
+        if(this.save_file.exists()) {
+            this.removeAllLabels(false);
+            this.data = new Database();
+            this.data.load_from_json(this.save_file);
+            this.saveMenuItem.setEnabled(true);
+            for (String label : this.data.labels_template.labels) {
+                this.createCheckbox(label);
+            }
+            display_new();
+        }
+    }
 
-    //private void loadBootOptions(){
-//
-    //}
+    private void saveBootOptions(){
+        JSONObject bootOptionsJS = new JSONObject();
+
+        if(save_file != null) {
+            bootOptionsJS.put("save_file", save_file.getAbsolutePath());
+        }
+        else{
+            bootOptionsJS.put("save_file", "None");
+        }
+
+        Map button_names = new LinkedHashMap(2);
+        button_names.put("finding", findingBtn.getText());
+        button_names.put("no finding", noFindingBtn.getText());
+        bootOptionsJS.put("buttons", button_names);
+
+        JSONArray statusbar = new JSONArray();
+        for(String name : this.statusBar) {
+            statusbar.add(name);
+        }
+        bootOptionsJS.put("statusbar", statusbar);
+
+        bootOptionsJS.put("is_ordered", ordered.isSelected());
+
+        String path = boot_file.getAbsolutePath();
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(path);
+            pw.write(bootOptionsJS.toJSONString());
+        }
+        catch (IOException e){
+            System.err.println("Caught IOException" + e.getMessage());
+        }
+        finally {
+            if(pw != null){
+                pw.flush();
+                pw.close();
+            }
+        }
+    }
+
+    private void loadBootOptions(){
+        try {
+            JSONObject bootOptions = (JSONObject) new JSONParser().parse(new FileReader(boot_file.getAbsolutePath()));
+
+            String save_file = (String) bootOptions.get("save_file");
+            JSONArray statusbar = (JSONArray) bootOptions.get("statusbar");
+            Map button_names = (Map) bootOptions.get("buttons");
+
+            for(int i=0; i<3; i++) {
+                this.statusBar[i] = (String) statusbar.get(i);
+            }
+            findingBtn.setText((String) button_names.get("finding"));
+            noFindingBtn.setText((String) button_names.get("no finding"));
+
+            boolean is_ordered = (boolean) bootOptions.get("is_ordered");
+            if(is_ordered){
+                ordered.setSelected(true);
+            }
+            else{
+                random.setSelected(true);
+            }
+
+            this.initializeStatusBar();
+
+            this.revalidate();
+            this.repaint();
+
+            if (!save_file.equals("None")) {
+                this.save_file = new File(save_file);
+                this.load_on_startup();
+            }
+        }
+        catch (IOException ioe){
+            System.err.println("Caught IOException" + ioe.getMessage());
+        }
+        catch (ParseException pe){
+            System.err.println("Caught ParseException" + pe.getMessage());
+        }
+    }
+
+    private void resetBootOptions(){
+        int option = JOptionPane.showConfirmDialog(panel, "Sollen alle Beschriftungen zurückgesetzt werden?");
+        if(option == JOptionPane.OK_OPTION) {
+            findingBtn.setText("Befund");
+            noFindingBtn.setText("Kein Befund");
+            this.statusBar[0] = "Aktuelles Bild";
+            this.statusBar[1] = "Befund";
+            this.statusBar[2] = "Gelabelte Bilder";
+            this.ordered.setSelected(true);
+            this.save_file = null;
+            this.initializeStatusBar();
+            this.revalidate();
+            this.repaint();
+        }
+    }
 
     private void createLabelsFromFile(){
         // specify a file to load the labels from
@@ -768,10 +890,10 @@ public class Interface extends JFrame{
                     else {
                         save_as(false);
                     }
-                    //saveBootOptions();
+                    saveBootOptions();
                     System.exit(0);
                 } else if (result == JOptionPane.NO_OPTION) {
-                    //saveBootOptions();
+                    saveBootOptions();
                     System.exit(0);
                 }
             }
