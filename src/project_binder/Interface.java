@@ -665,6 +665,8 @@ public class Interface extends JFrame{
             default_directory = "./";
         }
         JFileChooser chooser = new JFileChooser(default_directory);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.json", "json");
+        chooser.setFileFilter(filter);
         int option = chooser.showOpenDialog(panel);
         if(option == JFileChooser.APPROVE_OPTION){
             File saveFile = chooser.getSelectedFile();
