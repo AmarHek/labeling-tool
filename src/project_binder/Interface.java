@@ -41,6 +41,12 @@ public class Interface extends JFrame{
     private JLabel image_label;
     private File image_buffer;
     private File latest_image;
+    // shows the current size relative to original size, ranges from 0 to 100
+    private double scale_factor = 100;
+
+    private JButton plusButton;
+    private JButton minusButton;
+    private JFormattedTextField image_scale;
 
     private ArrayList<JCheckBox> labels_box = new ArrayList<>();
 
@@ -246,6 +252,10 @@ public class Interface extends JFrame{
         findingBtn = new JButton("Befund");
         noFindingBtn = new JButton("Kein Befund");
 
+        plusButton = new JButton("+");
+        minusButton = new JButton("-");
+        image_scale = new JFormattedTextField(Double.toString(scale_factor));
+
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
 
@@ -277,7 +287,11 @@ public class Interface extends JFrame{
                         .addGroup(gl.createSequentialGroup()
                                     .addComponent(previousBtn)
                                     .addComponent(nextBtn)
-                                    .addGap(0, 200, 1000)
+                                    .addGap(0, 100, 500)
+                                    .addComponent(minusButton)
+                                    .addComponent(image_scale)
+                                    .addComponent(plusButton)
+                                    .addGap(0, 100, 500)
                                     .addComponent(noFindingBtn)
                                     .addComponent(findingBtn))
                         .addComponent(image_label)
@@ -297,6 +311,9 @@ public class Interface extends JFrame{
                         .addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(nextBtn)
                                 .addComponent(previousBtn)
+                                .addComponent(minusButton)
+                                .addComponent(image_scale)
+                                .addComponent(plusButton)
                                 .addComponent(noFindingBtn)
                                 .addComponent(findingBtn))
                         .addComponent(image_label)
@@ -327,11 +344,19 @@ public class Interface extends JFrame{
                 "noFinding");
         noFindingBtn.getActionMap().put("noFinding", noFinding);
 
-        nextBtn.setToolTipText("Zeigt das nächste ");
+        plusButton.addActionListener((event) -> expandImage());
+        plusButton.setMnemonic(KeyEvent.VK_PLUS);
+        plusButton.setToolTipText("Vergößert das Bild");
+        minusButton.addActionListener((event) -> shrinkImage());
+        minusButton.setMnemonic(KeyEvent.VK_MINUS);
+        minusButton.setToolTipText("Verkleinert das Bild");
+        image_scale.addActionListener((event) -> setSize());
+
+        nextBtn.setToolTipText("Zeigt das nächste Bild gelabelte Bild an");
         previousBtn.setToolTipText("Geht zurück zu vorherigen (gelabelten) Bildern");
-        findingBtn.setToolTipText("Mark image as 'finding detected' " +
-                "and add all checked findings (at least one required)");
-        noFindingBtn.setToolTipText("Mark image as 'no finding detected'");
+        findingBtn.setToolTipText("Markiert das Bild als 'Befund/Fehler/etc. gefunden'" +
+                "und fügt alle markierten Labels zur Datenbank hinzu");
+        noFindingBtn.setToolTipText("Markiert das Bild als 'Kein Befund/Fehler/etc. gefunden");
 
         pack();
     }
@@ -340,6 +365,8 @@ public class Interface extends JFrame{
     private void setImage(File image){
         try {
             BufferedImage buffered = ImageIO.read(image);
+            // automatically downscale, if image is larger than screen size
+            //this.adjustSizeFactor(buffered);
             buffered = this.resizeImage(buffered);
             this.image_label.setIcon(new ImageIcon(buffered));
             this.setStatus(image);
@@ -352,46 +379,70 @@ public class Interface extends JFrame{
         }
     }
 
-    private BufferedImage resizeImage(BufferedImage image){
-        double resize_factor = 0.8;
-        double new_height;
-        double new_width;
+    // adjust scale_factor, so that image fits on screen
+    private void adjustSizeFactor(BufferedImage image){
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         double max_height = screenSize.getHeight();
         double max_width = screenSize.getWidth();
 
-        double old_height = (double) image.getHeight();
-        double old_width = (double) image.getWidth();
+        double current_height = (double) image.getHeight() * scale_factor / 100;
+        double current_width = (double) image.getWidth() * scale_factor / 100;
 
-        if(old_height > resize_factor * max_height){
-            new_height = resize_factor * max_height;
-            new_width = (new_height / old_height) * old_width;
+        while (current_height > max_height * 0.9 || current_width > max_width * 0.9) {
+            scale_factor = 0.95 * scale_factor;
+            current_height = (double) image.getHeight() * scale_factor / 100;
+            current_width = (double) image.getWidth() * scale_factor / 100;
         }
-        else if(old_width > resize_factor * max_width){
-            new_width = resize_factor * max_width;
-            new_height = (new_width / old_width) * old_height;
-        }
-        else if(old_height < 250){
-            new_height = 500;
-            new_width = (new_height / old_height) * old_width;
-        }
-        else if(old_width < 250){
-            new_width = 500;
-            new_height = (new_width / old_width) * old_height;
-        }
-        else{
-            new_height = old_height;
-            new_width = old_width;
+
     }
+
+    private BufferedImage resizeImage(BufferedImage image){
+        double original_height = (double) image.getHeight();
+        double original_width = (double) image.getWidth();
+
+        double new_height = this.scale_factor / 100. * original_height;
+        double new_width = this.scale_factor / 100. * original_width;
+
         BufferedImage resized = new BufferedImage((int) new_width, (int) new_height, image.getType());
         Graphics2D g = resized.createGraphics();
         g.drawImage(image, 0, 0, (int) new_width, (int) new_height, null);
         g.dispose();
         g.setComposite(AlphaComposite.Src);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         return resized;
+    }
+
+    private void expandImage(){
+        if(scale_factor < 250.) {
+            scale_factor = (scale_factor + 10) - (scale_factor % 10);
+            setImage(image_buffer);
+            image_scale.setText(Double.toString(scale_factor));
+        }
+    }
+
+    private void shrinkImage(){
+        if(scale_factor > 10.) {
+            if ((scale_factor % 10) == 0) {
+                scale_factor = scale_factor - 10;
+            } else {
+                scale_factor = scale_factor - (scale_factor % 10);
+            }
+            setImage(image_buffer);
+            image_scale.setText(Double.toString(scale_factor));
+        }
+    }
+
+    private void setSize(){
+        double new_scale = Double.parseDouble(image_scale.getText());
+        if(new_scale >= 1. && new_scale <= 250.){
+            scale_factor = new_scale;
+            setImage(image_buffer);
+        }
+        else{
+            image_scale.setText(Double.toString(scale_factor));
+        }
     }
 
     // change status bar
