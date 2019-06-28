@@ -343,8 +343,10 @@ public class Interface extends JFrame{
             buffered = this.resizeImage(buffered);
             this.image_label.setIcon(new ImageIcon(buffered));
             this.setStatus(image);
-            pack();
-            setLocationRelativeTo(null);
+            if(this.getExtendedState() == 0) {
+                pack();
+                setLocationRelativeTo(null);
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(panel, "Datei nicht gefunden");
         }
