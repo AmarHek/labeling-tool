@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import static javax.swing.LayoutStyle.ComponentPlacement.*;
@@ -68,6 +67,8 @@ public class Interface extends JFrame{
     private GroupLayout.ParallelGroup pGroup;
     private GroupLayout.SequentialGroup sGroup;
 
+    private JScrollPane image_area;
+
     public Interface() {
         initUI();
     }
@@ -80,9 +81,8 @@ public class Interface extends JFrame{
 
         this.setTitle("Labeling Tool");
         this.setLocationRelativeTo(null);
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        Locale locale = new Locale("de", "GER");
-        JOptionPane.setDefaultLocale(locale);
 
         WindowListener exitListener = exit();
         this.addWindowListener(exitListener);
@@ -246,18 +246,22 @@ public class Interface extends JFrame{
     private void createLayout(){
 
         // defining all Layout items
-        // JButton randomBtn = new JButton("Random");
         JButton nextBtn = new JButton("Weiter");
         JButton previousBtn = new JButton("Zurück");
         findingBtn = new JButton("Befund");
         noFindingBtn = new JButton("Kein Befund");
 
-        plusButton = new JButton("+");
-        minusButton = new JButton("-");
-        image_scale = new JFormattedTextField(Double.toString(scale_factor));
+        plusButton = new JButton();
+        minusButton = new JButton();
+        plusButton.setIcon(new ImageIcon("src/resources/plus.png"));
+        minusButton.setIcon(new ImageIcon("src/resources/minus.png"));
+        image_scale = new JFormattedTextField(Integer.toString((int) scale_factor));
 
         image_buffer = new File(placeholder);
         image_label = new JLabel(new ImageIcon(image_buffer.getPath()));
+
+        image_area = new JScrollPane(image_label);
+        image_area.getVerticalScrollBar().setUnitIncrement(16);
 
         initializeStatusBar();
 
@@ -287,14 +291,14 @@ public class Interface extends JFrame{
                         .addGroup(gl.createSequentialGroup()
                                     .addComponent(previousBtn)
                                     .addComponent(nextBtn)
-                                    .addGap(0, 100, 500)
+                                    .addGap(0, 200, 1000)
                                     .addComponent(minusButton)
                                     .addComponent(image_scale)
                                     .addComponent(plusButton)
-                                    .addGap(0, 100, 500)
+                                    .addGap(0, 200, 1000)
                                     .addComponent(noFindingBtn)
                                     .addComponent(findingBtn))
-                        .addComponent(image_label)
+                        .addComponent(image_area)
                         .addGroup(gl.createSequentialGroup()
                                     .addComponent(current_file)
                                     .addPreferredGap(RELATED, 20, 100)
@@ -316,7 +320,7 @@ public class Interface extends JFrame{
                                 .addComponent(plusButton)
                                 .addComponent(noFindingBtn)
                                 .addComponent(findingBtn))
-                        .addComponent(image_label)
+                        .addComponent(image_area)
                         .addGroup(gl.createParallelGroup()
                                 .addComponent(current_file)
                                 .addComponent(current_label)
@@ -325,6 +329,7 @@ public class Interface extends JFrame{
         );
 
         gl.linkSize(nextBtn, previousBtn, findingBtn, noFindingBtn);
+        gl.linkSize(minusButton, plusButton, image_scale);
         gl.linkSize(current_file, current_label, num_labeled);
 
         nextBtn.addActionListener(next);
@@ -350,7 +355,7 @@ public class Interface extends JFrame{
         minusButton.addActionListener((event) -> shrinkImage());
         minusButton.setMnemonic(KeyEvent.VK_MINUS);
         minusButton.setToolTipText("Verkleinert das Bild");
-        image_scale.addActionListener((event) -> setSize());
+        image_scale.addActionListener((event) -> setImageSize());
 
         nextBtn.setToolTipText("Zeigt das nächste Bild gelabelte Bild an");
         previousBtn.setToolTipText("Geht zurück zu vorherigen (gelabelten) Bildern");
@@ -361,19 +366,16 @@ public class Interface extends JFrame{
         pack();
     }
 
-    // functions for displaying the images
     private void setImage(File image){
         try {
             BufferedImage buffered = ImageIO.read(image);
-            // automatically downscale, if image is larger than screen size
-            //this.adjustSizeFactor(buffered);
             buffered = this.resizeImage(buffered);
             this.image_label.setIcon(new ImageIcon(buffered));
             this.setStatus(image);
-            if(this.getExtendedState() == 0) {
-                pack();
-                setLocationRelativeTo(null);
-            }
+            //if(this.getExtendedState() == 0) {
+            //    pack();
+            //    setLocationRelativeTo(null);
+            //}
         } catch (Exception e) {
             JOptionPane.showMessageDialog(panel, "Datei nicht gefunden");
         }
@@ -414,38 +416,41 @@ public class Interface extends JFrame{
         return resized;
     }
 
-    private void expandImage(){
-        if(scale_factor < 250.) {
-            scale_factor = (scale_factor + 10) - (scale_factor % 10);
+    private void expandImage() {
+        if (scale_factor < 500) {
+            scale_factor = (scale_factor + 5) - (scale_factor % 5);
             setImage(image_buffer);
-            image_scale.setText(Double.toString(scale_factor));
+            image_scale.setText(Integer.toString((int) scale_factor));
         }
     }
 
     private void shrinkImage(){
-        if(scale_factor > 10.) {
-            if ((scale_factor % 10) == 0) {
-                scale_factor = scale_factor - 10;
+        if(scale_factor > 5.) {
+            if ((scale_factor % 5) == 0) {
+                scale_factor = scale_factor - 5;
             } else {
-                scale_factor = scale_factor - (scale_factor % 10);
+                scale_factor = scale_factor - (scale_factor % 5);
             }
             setImage(image_buffer);
-            image_scale.setText(Double.toString(scale_factor));
+            image_scale.setText(Integer.toString((int) scale_factor));
         }
     }
 
-    private void setSize(){
-        double new_scale = Double.parseDouble(image_scale.getText());
-        if(new_scale >= 1. && new_scale <= 250.){
-            scale_factor = new_scale;
-            setImage(image_buffer);
+    private void setImageSize(){
+        try {
+            double new_scale = Double.parseDouble(image_scale.getText());
+            if (new_scale >= 1. && new_scale <= 500) {
+                scale_factor = new_scale;
+                setImage(image_buffer);
+            } else {
+                image_scale.setText(Integer.toString((int) scale_factor));
+            }
         }
-        else{
-            image_scale.setText(Double.toString(scale_factor));
+        catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(panel, "Bitte nur Zahlen eingeben.");
         }
     }
 
-    // change status bar
     private void setStatus(File image){
         String filename = image.getName();
         String label;
@@ -598,7 +603,6 @@ public class Interface extends JFrame{
         }
     }
 
-    // Functions for handling data: creating database, setting labels, saving and loading files, clearing progress
     private ArrayList<String> get_findings(){
         ArrayList<String> findings = new ArrayList<>();
         for(JCheckBox box : this.labels_box){
@@ -771,6 +775,19 @@ public class Interface extends JFrame{
 
         bootOptionsJS.put("is_ordered", ordered.isSelected());
 
+        Map window = new LinkedHashMap(3);
+        window.put("extendedState", this.getExtendedState());
+        if(this.getExtendedState() == 0) {
+            window.put("height", this.getHeight());
+            window.put("width", this.getWidth());
+        }
+        else{
+            this.setExtendedState(0);
+            window.put("height", this.getHeight());
+            window.put("width", this.getWidth());
+        }
+        bootOptionsJS.put("window", window);
+
         String path = boot_file.getAbsolutePath();
         PrintWriter pw = null;
         try {
@@ -809,6 +826,15 @@ public class Interface extends JFrame{
             else{
                 random.setSelected(true);
             }
+
+            Map window = (Map) bootOptions.get("window");
+            int pref_height = (int) (long) window.get("height");
+            int pref_width = (int) (long) window.get("width");
+            int extendedState = (int) (long) window.get("extendedState");
+
+            this.setSize(new Dimension(pref_width, pref_height));
+            this.setExtendedState(extendedState);
+            this.setLocationRelativeTo(null);
 
             this.initializeStatusBar();
 
@@ -956,7 +982,7 @@ public class Interface extends JFrame{
     }
 
     public static void main(String[] args){
-        java.util.Locale.setDefault(java.util.Locale.ENGLISH);
+        java.util.Locale.setDefault(java.util.Locale.GERMAN);
          EventQueue.invokeLater(() -> {
              Interface ex = new Interface();
              ex.setVisible(true);
